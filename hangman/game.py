@@ -22,7 +22,7 @@ def main():
 	print('Try to guess: ' + b)
 
 	while True:
-		print(count)
+		
 		if count == len(word):
 			print('Congratulations, you won!')
 			break
