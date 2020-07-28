@@ -14,13 +14,15 @@ class Board:
             ]
 
     def square(self, pos):
-        return self.board[pos[0]][pos[1]]
+        # print(pos)
+        return self.board[pos[1]][pos[0]]
 
 
     def alter(self, old_pos, new_pos):
-        piece = self.board[old_pos[0]][old_pos[1]]
-        self.board[old_pos[0]][old_pos[1]] = ' '
-        self.board[new_pos[0]][new_pos[1]] = piece
+        piece = self.board[old_pos[1]][old_pos[0]]
+        print(self.board[old_pos[0]][old_pos[1]])
+        self.board[old_pos[1]][old_pos[0]] = ' '
+        self.board[new_pos[1]][new_pos[0]] = piece
 
 
     def print(self):

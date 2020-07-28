@@ -2,32 +2,17 @@ from pieces import Piece
 
 class Team:
 
-    # teams = {
-    #     'wh':{'pawns':[], 'rooks':[], 'knights':[], 'bishops':[], 'king':[], 'queen':[]},
-    #     'bl':{'pawns':[], 'rooks':[], 'knights':[], 'bishops':[], 'king':[], 'queen':[]}
-    #     }
-
     def __init__(self, colour):
         self.colour = colour
         self.army = {'pawns':[], 'rooks':[], 'knights':[], 'bishops':[], 'king':[], 'queen':[]}
 
-    def populate(self):
-        """ Create teams and fill each team with their pieces
-
-        teams (dict): teams are wh (white) and bl (black). Each team
-                      contains keys that correspond to the name of a
-                      piece. The keys hold a list of objects
-                      representing pieces according to their name.
+    def recruit(self):
+        """ Fill a team's army with pieces
         """
-
-        print(self.army)
-
-        # for team in self.teams:
-            # pawns
+        # pawns
         for i in range(8):
             type = 'pawn'
             t_pawn = Piece(type, self.colour, starting_pos(self.colour, type, i))
-            # self.teams[team]['pawns'].append(t_pawn)
             self.army['pawns'].append(t_pawn)
 
         # rooks, knights, bishops
@@ -71,7 +56,7 @@ def starting_pos(colour, type, i):
 
     if colour == 'wh':
         if type == 'pawn':
-            return [i, 1]
+            return [i, 6]
         elif type == 'rook':
             return [0, 7], [7, 7]
         elif type == 'knight':
@@ -84,14 +69,14 @@ def starting_pos(colour, type, i):
             return [3, 7]
     elif colour == 'bl':
         if type == 'pawn':
-            return [i, 6]
+            return [i, 1]
         elif type == 'rook':
-            return [0, 0], [0, 7]
+            return [0, 0], [7, 0]
         elif type == 'knight':
-            return [0, 1], [0, 6]
+            return [1, 0], [6, 0]
         elif type == 'bishop':
-            return [0, 2], [0, 5]
+            return [2, 0], [5, 0]
         elif type == 'king':
-            return [0, 4]
+            return [4, 0]
         elif type == 'queen':
-            return [0, 3]
+            return [3, 0]
