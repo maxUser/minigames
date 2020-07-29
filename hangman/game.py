@@ -9,8 +9,7 @@ def main():
 
 	print('----- Player 2 -----')
 
-	# correct_guesses tracks the correct
-	# guesses of player 2
+	# correct_guesses tracks the correct guesses of player 2
 	correct_guesses = []
 	incorrect_guesses = []
 	count = 0 # number of letters guessed
