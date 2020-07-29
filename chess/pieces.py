@@ -1,7 +1,6 @@
 class Piece:
 
     def move(self, new_pos):
-        # TODO: check if new_pos is valid move
         self.pos = [new_pos[0], new_pos[1]]
 
     def __str__(self):

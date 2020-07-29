@@ -6,6 +6,12 @@ class Team:
         self.colour = colour
         self.army = {'pawns':[], 'rooks':[], 'knights':[], 'bishops':[], 'king':[], 'queen':[]}
 
+    def get_piece_by_pos(self, pos):
+        for piece_list in self.army.values():
+            for piece in piece_list:
+                if piece.pos == pos:
+                    return piece
+
     def recruit(self):
         """ Fill a team's army with pieces
         """
@@ -54,7 +60,7 @@ def starting_pos(colour, type, i):
     # 6
     # 7
 
-    if colour == 'wh':
+    if colour == 'cyan':
         if type == 'pawn':
             return [i, 6]
         elif type == 'rook':
@@ -67,7 +73,7 @@ def starting_pos(colour, type, i):
             return [4, 7]
         elif type == 'queen':
             return [3, 7]
-    elif colour == 'bl':
+    elif colour == 'yellow':
         if type == 'pawn':
             return [i, 1]
         elif type == 'rook':

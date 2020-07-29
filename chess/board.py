@@ -20,7 +20,7 @@ class Board:
 
     def alter(self, old_pos, new_pos):
         piece = self.board[old_pos[1]][old_pos[0]]
-        print(self.board[old_pos[0]][old_pos[1]])
+        # print(self.board[old_pos[0]][old_pos[1]])
         self.board[old_pos[1]][old_pos[0]] = ' '
         self.board[new_pos[1]][new_pos[0]] = piece
 
@@ -41,7 +41,7 @@ class Board:
                 if square.isupper():
                     print(colored(square, 'yellow'), end=' ')
                 else:
-                    print(colored(square, 'red'), end=' ')
+                    print(colored(square, 'cyan'), end=' ')
                 if last_col == 7:
                     print('||')
                 else:
