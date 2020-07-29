@@ -18,32 +18,39 @@ def check_move(team, old_x_y, new_x_y):
     colour = team.colour
     oppo_team = get_oppo_team(colour)
 
-    # friendly fire
+    # Check if move is legal according to piece move restrictions
+    piece_to_move = team.get_piece_by_pos(old_x_y)
+
+    if colour == 'cyan':
+        if piece_to_move.type == 'pawn':
+            if piece_to_move.initial_pos == True:
+                if ((new_x_y[1] == old_x_y[1]-1) or (new_x_y[1] == old_x_y[1]-2)) and (new_x_y[0] == old_x_y[0]):
+                    pass
+                else:
+                    return 'illegal'
+
+    # friendly fire is off
     for pieces in team.army:
-        # pawns, rooks, knights, bishops, king, queen
         for piece in team.army[pieces]:
-            # check every piece on same team
             if piece.pos == new_x_y:
                 return 'ff'
 
     # take opponent's piece
     for piece_list in oppo_team.army.values():
         for piece in piece_list:
-            # print(piece.pos, new_x_y)
             if piece.pos == new_x_y:
+                piece.initial_pos = False
                 return 'take'
 
-    # trying to move wrong team
+    # player trying to move wrong team
     for piece_list in oppo_team.army.values():
         for piece in piece_list:
-            # find piece selected to be moved
             if piece.pos == old_x_y:
-                # determine if piece is on same team as player moving it
                 if team.colour != piece.team:
                     return 'team_error'
 
 
-
+    piece_to_move.initial_pos = False
     return 'move'
 
 def y_flip(y):
@@ -124,6 +131,9 @@ def player_move(team):
             print('ERROR:\n***\nCannot move piece onto square occupied\nby piece of same team\n***')
             player_move(team)
 
+        elif result == 'illegal':
+            print('ERROR:\n***\nIllegal move\n***')
+            player_move(team)
 
         elif result == 'team_error':
             print('ERROR:\n***\nCannot move opponent\'s pieces\n***')
@@ -154,16 +164,22 @@ def player_move(team):
 
     return False
 
+def test_1_turn():
+    player_move(cy_team)
+    board.print()
+
 def main():
 
     cy_team.recruit()
     ye_team.recruit()
-    # print_pieces(ye_team)
 
     teams = (cy_team, ye_team)
 
     win = False
     i = 0
+
+    # test_1_turn()
+
     while win is False:
         print()
         win = player_move(teams[i%2])
