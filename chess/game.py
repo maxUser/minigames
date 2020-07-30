@@ -14,20 +14,9 @@ def get_oppo_team(curr_team):
     elif curr_team == 'yellow':
         return cy_team
 
-def check_move(team, old_x_y, new_x_y):
+def check_move(team, curr_x_y, new_x_y):
     colour = team.colour
     oppo_team = get_oppo_team(colour)
-
-    # Check if move is legal according to piece move restrictions
-    piece_to_move = team.get_piece_by_pos(old_x_y)
-
-    if colour == 'cyan':
-        if piece_to_move.type == 'pawn':
-            if piece_to_move.initial_pos == True:
-                if ((new_x_y[1] == old_x_y[1]-1) or (new_x_y[1] == old_x_y[1]-2)) and (new_x_y[0] == old_x_y[0]):
-                    pass
-                else:
-                    return 'illegal'
 
     # friendly fire is off
     for pieces in team.army:
@@ -35,19 +24,44 @@ def check_move(team, old_x_y, new_x_y):
             if piece.pos == new_x_y:
                 return 'ff'
 
+    # player trying to move wrong team
+    for piece_list in oppo_team.army.values():
+        for piece in piece_list:
+            if piece.pos == curr_x_y:
+                if team.colour != piece.team:
+                    return 'team_error'
+
+    # Check if move is legal according to piece move restrictions
+    piece_to_move = team.get_piece_by_pos(curr_x_y)
+    if colour == 'cyan':
+        if piece_to_move.type == 'pawn':
+            if piece_to_move.initial_pos == True:
+                if (curr_x_y[1] - new_x_y[1] <= 2) and (new_x_y[0] == curr_x_y[0]):
+                    pass
+                else:
+                    return 'illegal'
+            elif piece_to_move.initial_pos == False:
+                if (curr_x_y[1] - new_x_y[1] > 1) and (new_x_y[0] == curr_x_y[0]):
+                    return 'illegal'
+
+    elif colour == 'yellow':
+        if piece_to_move.type == 'pawn':
+            if piece_to_move.initial_pos == True:
+                if (curr_x_y[1] - new_x_y[1] >= -2) and (new_x_y[0] == curr_x_y[0]):
+                    pass
+                else:
+                    return 'illegal'
+            elif piece_to_move.initial_pos == False:
+                if (curr_x_y[1] - new_x_y[1] < -1) and (new_x_y[0] == curr_x_y[0]):
+                    return 'illegal'
+
+
     # take opponent's piece
     for piece_list in oppo_team.army.values():
         for piece in piece_list:
             if piece.pos == new_x_y:
                 piece.initial_pos = False
                 return 'take'
-
-    # player trying to move wrong team
-    for piece_list in oppo_team.army.values():
-        for piece in piece_list:
-            if piece.pos == old_x_y:
-                if team.colour != piece.team:
-                    return 'team_error'
 
 
     piece_to_move.initial_pos = False
@@ -115,17 +129,14 @@ def player_move(team):
         print_pieces(ye_team)
 
     # convert user input to list element indices
-    old_x_y = [letter_to_number(old_pos[0]), y_flip(old_pos[1])]
+    curr_x_y = [letter_to_number(old_pos[0]), y_flip(old_pos[1])]
     new_x_y = [letter_to_number(new_pos[0]), y_flip(new_pos[1])]
-    # print('from: ', old_x_y)
-    # print('to: ', new_x_y)
-    # print('from square: ', board.square(old_x_y))
-    # print('to square: ', board.square(new_x_y))
 
-    piece_to_move = team.get_piece_by_pos(old_x_y)
+    piece_to_move = team.get_piece_by_pos(curr_x_y)
 
     # Check if new pos is taken by piece from same team
-    result = check_move(team, old_x_y, new_x_y)
+    result = check_move(team, curr_x_y, new_x_y)
+    print(result)
     try:
         if result == 'ff':
             print('ERROR:\n***\nCannot move piece onto square occupied\nby piece of same team\n***')
@@ -139,10 +150,9 @@ def player_move(team):
             print('ERROR:\n***\nCannot move opponent\'s pieces\n***')
             player_move(team)
 
-
         elif result == 'take':
             print('Taking piece at: ' + new_pos)
-            board.alter(old_x_y, new_x_y)
+            board.alter(curr_x_y, new_x_y)
 
             # remove current piece occupying square
             piece_to_remove = get_oppo_team(team.colour).get_piece_by_pos(new_x_y)
@@ -154,7 +164,7 @@ def player_move(team):
 
         elif result == 'move':
             print('Moving {} to {}'.format(old_pos, new_pos))
-            board.alter(old_x_y, new_x_y)
+            board.alter(curr_x_y, new_x_y)
             piece_to_move.move(new_x_y)
 
     except AttributeError:
