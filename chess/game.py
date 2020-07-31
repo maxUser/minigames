@@ -4,6 +4,7 @@ from teams import Team
 
 from termcolor import colored
 
+
 board = Board()
 ye_team = Team('yellow')
 cy_team = Team('cyan')
@@ -35,6 +36,14 @@ def check_move(team, curr_x_y, new_x_y):
     piece_to_move = team.get_piece_by_pos(curr_x_y)
     if colour == 'cyan':
         if piece_to_move.type == 'pawn':
+            if ((new_x_y == [curr_x_y[0]+1, curr_x_y[1]-1]) and (curr_x_y[0] != 7)) or ((new_x_y == [curr_x_y[0]-1, curr_x_y[1]-1]) and (curr_x_y[0] != 0)):
+                # check if opponent has piece in diagonal square
+                for piece_list in oppo_team.army.values():
+                    for piece in piece_list:
+                        pass
+                print('diagonal move')
+                return 'move'
+
             if piece_to_move.initial_pos == True:
                 if (curr_x_y[1] - new_x_y[1] <= 2) and (new_x_y[0] == curr_x_y[0]):
                     pass
@@ -43,6 +52,7 @@ def check_move(team, curr_x_y, new_x_y):
             elif piece_to_move.initial_pos == False:
                 if (curr_x_y[1] - new_x_y[1] > 1) and (new_x_y[0] == curr_x_y[0]):
                     return 'illegal'
+            print('here')
 
     elif colour == 'yellow':
         if piece_to_move.type == 'pawn':
@@ -136,7 +146,7 @@ def player_move(team):
 
     # Check if new pos is taken by piece from same team
     result = check_move(team, curr_x_y, new_x_y)
-    print(result)
+    # print(result)
     try:
         if result == 'ff':
             print('ERROR:\n***\nCannot move piece onto square occupied\nby piece of same team\n***')
@@ -180,6 +190,8 @@ def test_1_turn():
 
 def main():
 
+    print(board.initialize_squares())
+
     cy_team.recruit()
     ye_team.recruit()
 
@@ -190,10 +202,10 @@ def main():
 
     # test_1_turn()
 
-    while win is False:
-        print()
-        win = player_move(teams[i%2])
-        i += 1
+    # while win is False:
+    #     print()
+    #     win = player_move(teams[i%2])
+    #     i += 1
 
 
 if __name__ == '__main__':
