@@ -1,6 +1,7 @@
 class Piece:
 
     initial_pos = True
+    threatened = False
 
     def move(self, new_pos):
         self.pos = [new_pos[0], new_pos[1]]

@@ -24,6 +24,10 @@ class Board:
                 ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
             ]
 
+    def move_piece(self, curr_pos, tar_pos):
+        self.squares[tar_pos] = self.squares[curr_pos]
+        self.squares[curr_pos] = ''
+
     def initialize_squares(self):
         default_pos = [-1, -1]
         cyan_pawn = re.compile('[a-h]2')
@@ -76,13 +80,14 @@ class Board:
                 self.squares[square] = t_queen
 
 
-        # for key, value in self.squares.items():
-        #     print(key, end=' ')
-        #     print(value)
+    def print_squares(self):
+        for key, value in self.squares.items():
+            print(key, end=' ')
+            print(value)
 
 
 
-    def square(self, pos):
+    def print_square(self, pos):
         # print(pos)
         return self.board[pos[1]][pos[0]]
 
@@ -94,7 +99,7 @@ class Board:
         self.board[new_pos[1]][new_pos[0]] = piece
 
 
-    def print(self):
+    def print_board(self):
         x_axis = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         y_axis = ['8', '7', '6', '5', '4', '3', '2', '1']
         # white = lower case
