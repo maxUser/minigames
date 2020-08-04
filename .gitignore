@@ -1,4 +1,5 @@
 /venv/*
 /.DS_Store
 /tictactoe/__pycache__/
-/chess/__pycache__/*/
+/chess/__pycache__/
+/chess/pieces.pyc
