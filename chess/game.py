@@ -45,7 +45,7 @@ def pawn_rules(colour, curr_pos, tar_pos):
 
     return 'move'
 
-def check_move(team, curr_pos, tar_pos):
+def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     colour = team.colour
     oppo_team = get_oppo_team(colour)
 
@@ -58,7 +58,69 @@ def check_move(team, curr_pos, tar_pos):
         return 'selection_error'
 
     # check if piece move through another piece (unless knight)
-    # if board.squares[curr_pos].type != 'knight':
+    if board.squares[curr_pos].type != 'knight':
+        exes = []
+        whys = []
+
+        # get all in between squares
+        if abs((tar_x_y[0]-curr_x_y[0])) == abs((tar_x_y[1]-curr_x_y[1])):
+            # diagonal move
+            if curr_x_y[0] > tar_x_y[0]:
+                # left diagonal
+                print('left diagonal')
+                for x in range(tar_x_y[0]+1, curr_x_y[0]):
+                    exes.append(x)
+            else:
+                # right diagonal
+                print('right diagonal')
+                for x in range(curr_x_y[0]+1, tar_x_y[0]):
+                    exes.append(x)
+
+            if curr_x_y[1] > tar_x_y[1]:
+                # upward diagonal
+                print('upward diagonal')
+                for y in range(tar_x_y[1]+1, curr_x_y[1]):
+                    whys.append(y)
+
+            else:
+                # downward diagonal
+                print('downward diagonal')
+                for y in range(curr_x_y[1]+1, tar_x_y[1]):
+                    whys.append(y)
+        else:
+            # straight move
+            if curr_x_y[0] > tar_x_y[0]:
+                x1 = curr_x_y[0]
+                while x1 > tar_x_y[0]:
+                    x1 -= 1
+                    exes.append(x1)
+            elif tar_x_y[0] > curr_x_y[0]:
+                x2 = tar_x_y[0]
+                while x2 > curr_x_y[0]:
+                    x2 -= 1
+                    exes.append(x2)
+
+            elif curr_x_y[1] > tar_x_y[1]:
+                y1 = curr_x_y[1]
+                while y1 > tar_x_y[1]:
+                    y1 -= 1
+                    whys.append(y1)
+            elif tar_x_y[1] > curr_x_y[1]:
+                y2 = tar_x_y[1]
+                while y2 > curr_x_y[1]:
+                    y2 -= 1
+                    whys.append(y2)
+
+        exes = exes[::-1]
+        for index, value in enumerate(exes):
+            letter = number_to_letter(value)
+            number = y_flip(whys[index])
+            pos = letter+str(number)
+            if board.squares[pos] != '':
+                return 'illegal'
+
+        return 'move'
+
 
 
     # friendly fire is off
@@ -76,7 +138,6 @@ def check_move(team, curr_pos, tar_pos):
             once all piece specific rules are in place
         """
         return 'move'
-
 
 def check_move_old(team, curr_x_y, new_x_y):
     colour = team.colour
@@ -178,16 +239,29 @@ def letter_to_number(c):
     elif c == 'h':
         return 7
 
+def number_to_letter(n):
+    if n == 0:
+        return 'a'
+    elif n == 1:
+        return 'b'
+    elif n == 2:
+        return 'c'
+    elif n == 3:
+        return 'd'
+    elif n == 4:
+        return 'e'
+    elif n == 5:
+        return 'f'
+    elif n == 6:
+        return 'g'
+    elif n == 7:
+        return 'h'
+
 def get_oppo_team(curr_team):
     if curr_team == 'cyan':
         return ye_team
     elif curr_team == 'yellow':
         return cy_team
-
-def print_pieces(team):
-    for value in team.army.values():
-        for piece in value:
-            print(piece)
 
 def print_error(msg):
     print('ERROR:\n***\n{}\n***'.format(msg))
@@ -221,20 +295,20 @@ def player_move(team):
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
 
 
-    # result = check_move(team, curr_x_y, new_x_y)
-    result = check_move(team, curr_pos, tar_pos)
+    print('From {}'.format(curr_x_y))
+    print('To {}'.format(tar_x_y))
+    result = check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y)
     # print('result of check_move is: {}'.format(result))
 
     return result, curr_pos, tar_pos, curr_x_y, tar_x_y
-
 
 def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
     """
         Takes result of player_move and check_move functions
         to determine next action
 
-        Return: 0 if move is invalid
-                1 if move is valid
+        Return: 0 if move is invalid (same player's turn)
+                1 if move is valid (next player's turn)
     """
     # print('result is {}'.format(result))
     if result == 'ff':
@@ -299,9 +373,7 @@ def main():
 
         team = teams[i%2]
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(team)
-        # print('result of player_move is {}'.format(move_result))
         i += act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, team)
-        # i += 1
 
 
 if __name__ == '__main__':
