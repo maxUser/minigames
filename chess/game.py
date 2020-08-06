@@ -37,9 +37,6 @@ def pawn_rules(colour, curr_pos, tar_pos):
             return 'illegal'
 
     # Take piece diagonally
-    print(tar_x_y[0], curr_x_y[0])
-    print(board.squares[tar_pos])
-    print(curr_x_y[1] - tar_x_y[1] == 1)
     if tar_x_y[0] != curr_x_y[0] and board.squares[tar_pos] != '' and curr_x_y[1] - tar_x_y[1] == 1 and colour == 'cyan':
         return 'take'
     elif tar_x_y[0] != curr_x_y[0] and board.squares[tar_pos] != '' and curr_x_y[1] - tar_x_y[1] == -1 and colour == 'yellow':
@@ -215,7 +212,6 @@ def player_move(team):
     curr_pos = get_piece_to_move()#input('Piece to move: ')
     tar_pos = get_target_position()#input('Move to: ')
 
-
     if curr_pos == 'pp':
         print_pieces(cy_team)
         print_pieces(ye_team)
@@ -287,9 +283,13 @@ def main():
     i = 0
 
     board.initialize_squares()
-    # player_move(cy_team)
+    # board.print_board()
+    # board.reset_game()
+    # board.print_board()
+    # pawn = board.squares['a2']
+    # print('as', pawn)
+    # return None
 
-    # test_1_turn()
 
     while win is False:
         print()
