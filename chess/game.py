@@ -9,6 +9,15 @@ board = Board()
 ye_team = Team('yellow')
 cy_team = Team('cyan')
 
+
+def rook_rules(colour, curr_pos, tar_pos):
+    curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
+    tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
+
+    # Cannot move diagonally
+    if curr_x_y[0] != tar_x_y[0] or curr_x_y[1] != tar_x_y[1]:
+        return 'illegal'
+
 def pawn_rules(colour, curr_pos, tar_pos):
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
@@ -60,6 +69,11 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     # check if move is legal according to piece move restrictions
     if board.squares[curr_pos].type == 'pawn':
         return pawn_rules(colour, curr_pos, tar_pos)
+
+    # friendly fire is off
+    if board.squares[curr_pos] != '' and board.squares[tar_pos] != '':
+        if board.squares[tar_pos].team == board.squares[curr_pos].team:
+            return 'ff'
 
     # check if piece move through another piece (unless knight)
     if board.squares[curr_pos].type != 'knight':
@@ -129,15 +143,13 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
             letter = number_to_letter(value)
             number = y_flip(whys[index])
             pos = letter+str(number)
-            if board.squares[pos] != '':
-                return 'illegal'
+            if len(pos) == 2:
+                if board.squares[pos] != '':
+                    return 'illegal'
 
         return 'move'
 
-    # friendly fire is off
-    if board.squares[curr_pos] == '' and board.squares[tar_pos] == '':
-        if board.squares[tar_pos].team == board.squares[curr_pos].team:
-            return 'ff'
+
 
 
     # if target sqauare is empty, move piece
