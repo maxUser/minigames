@@ -51,7 +51,6 @@ def pawn_rules(colour, curr_pos, tar_pos):
     elif tar_x_y[0] != curr_x_y[0] and board.squares[tar_pos] != '' and curr_x_y[1] - tar_x_y[1] == -1 and colour == 'yellow':
         return 'take'
 
-
     return 'move'
 
 def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
