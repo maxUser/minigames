@@ -57,6 +57,10 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     if board.squares[curr_pos] == '' or colour != board.squares[curr_pos].team:
         return 'selection_error'
 
+    # check if move is legal according to piece move restrictions
+    if board.squares[curr_pos].type == 'pawn':
+        return pawn_rules(colour, curr_pos, tar_pos)
+
     # check if piece move through another piece (unless knight)
     if board.squares[curr_pos].type != 'knight':
         exes = []
@@ -111,8 +115,17 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
                     y2 -= 1
                     whys.append(y2)
 
-        exes = exes[::-1]
+        exes = exes[::-1] # reverse list
+        if not exes:
+            for i in range(len(whys)):
+                exes.append(0)
+        if not whys:
+            for i in range(len(exes)):
+                whys.append(0)
+
         for index, value in enumerate(exes):
+            # match indices of exes and whys lists to get
+            # all squares between curr_pos and tar_pos
             letter = number_to_letter(value)
             number = y_flip(whys[index])
             pos = letter+str(number)
@@ -121,16 +134,11 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
 
         return 'move'
 
-
-
     # friendly fire is off
     if board.squares[curr_pos] == '' and board.squares[tar_pos] == '':
         if board.squares[tar_pos].team == board.squares[curr_pos].team:
             return 'ff'
 
-    # check if move is legal according to piece move restrictions
-    if board.squares[curr_pos].type == 'pawn':
-        return pawn_rules(colour, curr_pos, tar_pos)
 
     # if target sqauare is empty, move piece
     if board.squares[tar_pos] == '':
@@ -295,8 +303,8 @@ def player_move(team):
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
 
 
-    print('From {}'.format(curr_x_y))
-    print('To {}'.format(tar_x_y))
+    # print('From {}'.format(curr_x_y))
+    # print('To {}'.format(tar_x_y))
     result = check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y)
     # print('result of check_move is: {}'.format(result))
 
