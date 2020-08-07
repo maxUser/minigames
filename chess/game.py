@@ -65,10 +65,6 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     if board.squares[curr_pos] == '' or colour != board.squares[curr_pos].team:
         return 'selection_error'
 
-    # check if move is legal according to piece move restrictions
-    if board.squares[curr_pos].type == 'pawn':
-        return pawn_rules(colour, curr_pos, tar_pos)
-
     # friendly fire is off
     if board.squares[curr_pos] != '' and board.squares[tar_pos] != '':
         if board.squares[tar_pos].team == board.squares[curr_pos].team:
@@ -84,72 +80,84 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
             # diagonal move
             if curr_x_y[0] > tar_x_y[0]:
                 # left diagonal
-                print('left diagonal')
+                # print('left diagonal')
                 for x in range(tar_x_y[0]+1, curr_x_y[0]):
                     exes.append(x)
             else:
                 # right diagonal
-                print('right diagonal')
+                # print('right diagonal')
                 for x in range(curr_x_y[0]+1, tar_x_y[0]):
                     exes.append(x)
 
             if curr_x_y[1] > tar_x_y[1]:
                 # upward diagonal
-                print('upward diagonal')
+                # print('upward diagonal')
                 for y in range(tar_x_y[1]+1, curr_x_y[1]):
                     whys.append(y)
 
             else:
                 # downward diagonal
-                print('downward diagonal')
+                # print('downward diagonal')
                 for y in range(curr_x_y[1]+1, tar_x_y[1]):
                     whys.append(y)
         else:
             # straight move
-            if curr_x_y[0] > tar_x_y[0]:
-                x1 = curr_x_y[0]
-                while x1 > tar_x_y[0]:
-                    x1 -= 1
-                    exes.append(x1)
-            elif tar_x_y[0] > curr_x_y[0]:
-                x2 = tar_x_y[0]
-                while x2 > curr_x_y[0]:
-                    x2 -= 1
-                    exes.append(x2)
+            if curr_pos[0] == tar_pos[0] and colour == 'cyan':
+                # same x
+                for i in range(int(curr_pos[1])+1, int(tar_pos[1])):
+                    pos = curr_pos[0] + str(i)
+                    if board.squares[pos] != '':
+                        return 'illegal'
+            elif curr_pos[0] == tar_pos[0] and colour == 'yellow':
+                # same x
+                for i in range(int(tar_pos[1])+1, int(curr_pos[1])):
+                    pos = curr_pos[0] + str(i)
+                    if board.squares[pos] != '':
+                        return 'illegal'
+            # lateral move
+            start = letter_to_number(curr_pos[0])
+            end = letter_to_number(tar_pos[0])
+            print(start, end)
+            if curr_pos[1] == tar_pos[1] and colour == 'cyan':
+                # same y
+                if start < end:
+                    # left to right
+                    for i in range(start+1, end):
+                        pos = str(number_to_letter(i)+curr_pos[1])
+                        print(pos)
+                        if board.squares[pos] != '':
+                            return 'illegal'
+                else:
+                    # right to left
+                    for i in range(end, start-1):
+                        pos = str(number_to_letter(i)+curr_pos[1])
+                        print(pos)
+                        if board.squares[pos] != '':
+                            return 'illegal'
+            elif curr_pos[1] == tar_pos[1] and colour == 'yellow':
+                # same y
+                if start < end:
+                    # left to right
+                    for i in range(start+1, end):
+                        pos = str(number_to_letter(i)+curr_pos[1])
+                        print(pos)
+                        if board.squares[pos] != '':
+                            return 'illegal'
+                else:
+                    # right to left
+                    for i in range(end, start-1):
+                        pos = str(number_to_letter(i)+curr_pos[1])
+                        print(pos)
+                        if board.squares[pos] != '':
+                            return 'illegal'
 
-            elif curr_x_y[1] > tar_x_y[1]:
-                y1 = curr_x_y[1]
-                while y1 > tar_x_y[1]:
-                    y1 -= 1
-                    whys.append(y1)
-            elif tar_x_y[1] > curr_x_y[1]:
-                y2 = tar_x_y[1]
-                while y2 > curr_x_y[1]:
-                    y2 -= 1
-                    whys.append(y2)
-
-        exes = exes[::-1] # reverse list
-        if not exes:
-            for i in range(len(whys)):
-                exes.append(0)
-        if not whys:
-            for i in range(len(exes)):
-                whys.append(0)
-
-        for index, value in enumerate(exes):
-            # match indices of exes and whys lists to get
-            # all squares between curr_pos and tar_pos
-            letter = number_to_letter(value)
-            number = y_flip(whys[index])
-            pos = letter+str(number)
-            if len(pos) == 2:
-                if board.squares[pos] != '':
-                    return 'illegal'
-
-        return 'move'
 
 
-
+    # check if move is legal according to piece move restrictions
+    if board.squares[curr_pos].type == 'pawn':
+        return pawn_rules(colour, curr_pos, tar_pos)
+    # elif board.squares[curr_pos].type == 'rook':
+    #     return rook_rules(colour, curr_pos, tar_pos)
 
     # if target sqauare is empty, move piece
     if board.squares[tar_pos] == '':

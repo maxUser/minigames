@@ -156,6 +156,40 @@ class TestPawn:
     """
         Notes: Call board.reset_game() at the start of every test
     """
+    def test_rook_lateral_move(self, monkeypatch):
+        board.reset_game()
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectH2)
+        monkeypatch.setattr(game, 'get_target_position', selectH4)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectH7)
+        monkeypatch.setattr(game, 'get_target_position', selectH5)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectH1)
+        monkeypatch.setattr(game, 'get_target_position', selectH3)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectH8)
+        monkeypatch.setattr(game, 'get_target_position', selectH6)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectH3)
+        monkeypatch.setattr(game, 'get_target_position', selectC3)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectH6)
+        monkeypatch.setattr(game, 'get_target_position', selectD6)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+
+
     def test_cyPawn_initPos_2square_move(self, monkeypatch):
         board.reset_game()
         pawn = board.squares['a2']
