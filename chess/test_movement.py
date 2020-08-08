@@ -156,6 +156,31 @@ class TestPawn:
     """
         Notes: Call board.reset_game() at the start of every test
     """
+
+
+    """ ROOK TESTS
+
+    """
+    def test_rook_diagonal_move(self, monkeypatch):
+        board.reset_game()
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
+        monkeypatch.setattr(game, 'get_target_position', selectA4)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectA1)
+        monkeypatch.setattr(game, 'get_target_position', selectA3)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectA3)
+        monkeypatch.setattr(game, 'get_target_position', selectC5)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        assert result == 0
+
     def test_rook_lateral_move(self, monkeypatch):
         board.reset_game()
 
@@ -187,8 +212,28 @@ class TestPawn:
         monkeypatch.setattr(game, 'get_piece_to_move', selectH6)
         monkeypatch.setattr(game, 'get_target_position', selectD6)
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
 
+        assert result == 1
+
+    """ PAWN TESTS
+
+    """
+
+    def test_pawn_diagonal_move(self, monkeypatch):
+        board.reset_game()
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
+        monkeypatch.setattr(game, 'get_target_position', selectA3)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectA3)
+        monkeypatch.setattr(game, 'get_target_position', selectB4)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        assert result == 0
 
     def test_cyPawn_initPos_2square_move(self, monkeypatch):
         board.reset_game()

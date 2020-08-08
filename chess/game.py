@@ -15,8 +15,10 @@ def rook_rules(colour, curr_pos, tar_pos):
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
 
     # Cannot move diagonally
-    if curr_x_y[0] != tar_x_y[0] or curr_x_y[1] != tar_x_y[1]:
+    if curr_x_y[0] != tar_x_y[0] and curr_x_y[1] != tar_x_y[1]:
         return 'illegal'
+
+    return None
 
 def pawn_rules(colour, curr_pos, tar_pos):
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
@@ -30,6 +32,10 @@ def pawn_rules(colour, curr_pos, tar_pos):
 
     # Cannot take piece with same x value
     if tar_x_y[0] == curr_x_y[0] and board.squares[tar_pos] != '':
+        return 'illegal'
+
+    # Cannot move diagonally
+    if board.squares[tar_pos] == '' and tar_x_y[0] != curr_x_y[0]:
         return 'illegal'
 
     # Can only move forward by 1 square unless moving from
@@ -51,11 +57,12 @@ def pawn_rules(colour, curr_pos, tar_pos):
     elif tar_x_y[0] != curr_x_y[0] and board.squares[tar_pos] != '' and curr_x_y[1] - tar_x_y[1] == -1 and colour == 'yellow':
         return 'take'
 
-    return 'move'
+    return None
 
 def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     colour = team.colour
     oppo_team = get_oppo_team(colour)
+    result = 'no_result'
 
     # check if input matches a valid board square
     if curr_pos not in board.squares or tar_pos not in board.squares:
@@ -107,7 +114,7 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
                 for i in range(int(curr_pos[1])+1, int(tar_pos[1])):
                     pos = curr_pos[0] + str(i)
                     if board.squares[pos] != '':
-                        return 'illegal'
+                        result = 'illegal'
             elif curr_pos[0] == tar_pos[0] and colour == 'yellow':
                 # same x
                 for i in range(int(tar_pos[1])+1, int(curr_pos[1])):
@@ -117,7 +124,7 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
             # lateral move
             start = letter_to_number(curr_pos[0])
             end = letter_to_number(tar_pos[0])
-            print(start, end)
+            # print(start, end)
             if curr_pos[1] == tar_pos[1] and colour == 'cyan':
                 # same y
                 if start < end:
@@ -152,19 +159,30 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
                             return 'illegal'
 
 
-
     # check if move is legal according to piece move restrictions
     if board.squares[curr_pos].type == 'pawn':
-        return pawn_rules(colour, curr_pos, tar_pos)
-    # elif board.squares[curr_pos].type == 'rook':
-    #     return rook_rules(colour, curr_pos, tar_pos)
+        result = pawn_rules(colour, curr_pos, tar_pos)
+    elif board.squares[curr_pos].type == 'rook':
+        result = rook_rules(colour, curr_pos, tar_pos)
 
-    # if target sqauare is empty, move piece
-    if board.squares[tar_pos] == '':
-        """THIS MUST BE REMOVED
-            once all piece specific rules are in place
-        """
-        return 'move'
+    if result == 'illegal':
+        return result
+    else:
+        # move or take
+        if board.squares[tar_pos] != '':
+            return 'take'
+        else:
+            return 'move'
+
+    # if board.squares[tar_pos] == '':
+    #     """THIS MUST BE REMOVED
+    #         once all piece specific rules are in place
+    #     """
+    #     result = 'move'
+    # else:
+    #     result = 'take'
+
+    return result
 
 def check_move_old(team, curr_x_y, new_x_y):
     colour = team.colour
@@ -312,6 +330,9 @@ def player_move(team):
 
     curr_pos = get_piece_to_move()#input('Piece to move: ')
     tar_pos = get_target_position()#input('Move to: ')
+
+    print(curr_pos)
+    print(tar_pos)
 
     if curr_pos == 'pp':
         print_pieces(cy_team)
