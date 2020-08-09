@@ -9,13 +9,58 @@ board = Board()
 ye_team = Team('yellow')
 cy_team = Team('cyan')
 
-
-def rook_rules(colour, curr_pos, tar_pos):
+def king_rules(curr_pos, tar_pos):
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
 
+    if abs(curr_x_y[0] - tar_x_y[0]) != 1 or abs(curr_x_y[1] - tar_x_y[1]) != 1:
+        return 'illegal'
+
+    return None
+
+def bishop_rules(curr_pos, tar_pos):
+    # Can only move diagonally
+    if curr_pos[0] == tar_pos[0] or curr_pos[1] == tar_pos[1]:
+        return 'illegal'
+
+    return None
+
+
+def knight_rules(curr_pos, tar_pos):
+    """
+        Knights can only move in an L shape.
+        Ensure the tar_pos is +-2 x or y and
+        +- 1 x or y.
+        Example scenarios (Cyan):
+        1) Move up (y-2) and left (x-1)
+        2) Move right (x+2) and up (y-1)
+        3) Move down (y+2) and left (x-1)
+        x operators are swapped for yellow
+    """
+    curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
+    tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
+
+    if abs(curr_x_y[0] - tar_x_y[0]) == 1:
+        # up or down move
+        if abs(curr_x_y[1] - tar_x_y[1]) != 2:
+            # diff in y must == 2
+            return 'illegal'
+    elif abs(curr_x_y[1] - tar_x_y[1]) == 1:
+        # lateral move
+        if abs(curr_x_y[0] - tar_x_y[0]) != 2:
+            # diff in y must == 2
+            return 'illegal'
+    else:
+        return 'illegal'
+
+    return None
+
+def rook_rules(curr_pos, tar_pos):
+    # curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
+    # tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
+
     # Cannot move diagonally
-    if curr_x_y[0] != tar_x_y[0] and curr_x_y[1] != tar_x_y[1]:
+    if curr_pos[0] != tar_pos[0] and curr_pos[1] != tar_pos[1]:
         return 'illegal'
 
     return None
@@ -60,6 +105,11 @@ def pawn_rules(colour, curr_pos, tar_pos):
     return None
 
 def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
+    """
+    The logic: check if move is illegal, if not determine
+                whether it is a take or move.
+    """
+
     colour = team.colour
     oppo_team = get_oppo_team(colour)
     result = 'no_result'
@@ -78,6 +128,7 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
             return 'ff'
 
     # check if piece move through another piece (unless knight)
+    # IMPROVE: there must be simpler way to do this
     if board.squares[curr_pos].type != 'knight':
         exes = []
         whys = []
@@ -87,24 +138,20 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
             # diagonal move
             if curr_x_y[0] > tar_x_y[0]:
                 # left diagonal
-                # print('left diagonal')
                 for x in range(tar_x_y[0]+1, curr_x_y[0]):
                     exes.append(x)
             else:
                 # right diagonal
-                # print('right diagonal')
                 for x in range(curr_x_y[0]+1, tar_x_y[0]):
                     exes.append(x)
 
             if curr_x_y[1] > tar_x_y[1]:
                 # upward diagonal
-                # print('upward diagonal')
                 for y in range(tar_x_y[1]+1, curr_x_y[1]):
                     whys.append(y)
 
             else:
                 # downward diagonal
-                # print('downward diagonal')
                 for y in range(curr_x_y[1]+1, tar_x_y[1]):
                     whys.append(y)
         else:
@@ -163,88 +210,22 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     if board.squares[curr_pos].type == 'pawn':
         result = pawn_rules(colour, curr_pos, tar_pos)
     elif board.squares[curr_pos].type == 'rook':
-        result = rook_rules(colour, curr_pos, tar_pos)
+        result = rook_rules(curr_pos, tar_pos)
+    elif board.squares[curr_pos].type == 'knight':
+        result = knight_rules(curr_pos, tar_pos)
+    elif board.squares[curr_pos].type == 'bishop':
+        result = bishop_rules(curr_pos, tar_pos)
+    elif board.squares[curr_pos].type == 'king':
+        result = king_rules(curr_pos, tar_pos)
 
     if result == 'illegal':
         return result
     else:
         # move or take
         if board.squares[tar_pos] != '':
-            return 'take'
-        else:
             return 'move'
-
-    # if board.squares[tar_pos] == '':
-    #     """THIS MUST BE REMOVED
-    #         once all piece specific rules are in place
-    #     """
-    #     result = 'move'
-    # else:
-    #     result = 'take'
-
-    return result
-
-def check_move_old(team, curr_x_y, new_x_y):
-    colour = team.colour
-    oppo_team = get_oppo_team(colour)
-
-    # friendly fire is off
-    for pieces in team.army:
-        for piece in team.army[pieces]:
-            if piece.pos == new_x_y:
-                return 'ff'
-
-    # player trying to move wrong team
-    for piece_list in oppo_team.army.values():
-        for piece in piece_list:
-            if piece.pos == curr_x_y:
-                if team.colour != piece.team:
-                    return 'team_error'
-
-    # Check if move is legal according to piece move restrictions
-    piece_to_move = team.get_piece_by_pos(curr_x_y)
-    if colour == 'cyan':
-        if piece_to_move.type == 'pawn':
-            if ((new_x_y == [curr_x_y[0]+1, curr_x_y[1]-1]) and (curr_x_y[0] != 7)) or ((new_x_y == [curr_x_y[0]-1, curr_x_y[1]-1]) and (curr_x_y[0] != 0)):
-                # check if opponent has piece in diagonal square
-                for piece_list in oppo_team.army.values():
-                    for piece in piece_list:
-                        pass
-                print('diagonal move')
-                return 'move'
-
-            if piece_to_move.initial_pos == True:
-                if (curr_x_y[1] - new_x_y[1] <= 2) and (new_x_y[0] == curr_x_y[0]):
-                    pass
-                else:
-                    return 'illegal'
-            elif piece_to_move.initial_pos == False:
-                if (curr_x_y[1] - new_x_y[1] > 1) and (new_x_y[0] == curr_x_y[0]):
-                    return 'illegal'
-            print('here')
-
-    elif colour == 'yellow':
-        if piece_to_move.type == 'pawn':
-            if piece_to_move.initial_pos == True:
-                if (curr_x_y[1] - new_x_y[1] >= -2) and (new_x_y[0] == curr_x_y[0]):
-                    pass
-                else:
-                    return 'illegal'
-            elif piece_to_move.initial_pos == False:
-                if (curr_x_y[1] - new_x_y[1] < -1) and (new_x_y[0] == curr_x_y[0]):
-                    return 'illegal'
-
-
-    # take opponent's piece
-    for piece_list in oppo_team.army.values():
-        for piece in piece_list:
-            if piece.pos == new_x_y:
-                piece.initial_pos = False
-                return 'take'
-
-
-    piece_to_move.initial_pos = False
-    return 'move'
+        else:
+            return 'take'
 
 def y_flip(y):
     y = int(y)
@@ -330,9 +311,6 @@ def player_move(team):
 
     curr_pos = get_piece_to_move()#input('Piece to move: ')
     tar_pos = get_target_position()#input('Move to: ')
-
-    print(curr_pos)
-    print(tar_pos)
 
     if curr_pos == 'pp':
         print_pieces(cy_team)
