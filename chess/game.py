@@ -9,6 +9,19 @@ board = Board()
 ye_team = Team('yellow')
 cy_team = Team('cyan')
 
+def queen_rules(curr_pos, tar_pos):
+    curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
+    tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
+
+    if curr_pos[0] != tar_pos[0] and curr_pos[1] != tar_pos[1]:
+        # Non-straight movement
+        if abs(curr_x_y[0] - tar_x_y[0]) - abs(curr_x_y[1] - tar_x_y[1]) != 0:
+            # disallow awkward moves like E3 to F5
+            return 'illegal'
+
+    return None
+
+
 def king_rules(curr_pos, tar_pos):
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
@@ -19,8 +32,17 @@ def king_rules(curr_pos, tar_pos):
     return None
 
 def bishop_rules(curr_pos, tar_pos):
+    curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
+    tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
+
     # Can only move diagonally
+    # Difference in x == difference in y
     if curr_pos[0] == tar_pos[0] or curr_pos[1] == tar_pos[1]:
+        # disallow straight or lateral movement
+        return 'illegal'
+
+    if abs(curr_x_y[0] - tar_x_y[0]) - abs(curr_x_y[1] - tar_x_y[1]) != 0:
+        # disallow awkward moves like E3 to F5
         return 'illegal'
 
     return None
@@ -56,9 +78,6 @@ def knight_rules(curr_pos, tar_pos):
     return None
 
 def rook_rules(curr_pos, tar_pos):
-    # curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
-    # tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
-
     # Cannot move diagonally
     if curr_pos[0] != tar_pos[0] and curr_pos[1] != tar_pos[1]:
         return 'illegal'
@@ -86,14 +105,10 @@ def pawn_rules(colour, curr_pos, tar_pos):
     # Can only move forward by 1 square unless moving from
     # starting position, then can move 1 or 2 squares forward
     if not board.squares[curr_pos].initial_pos:
-        if curr_x_y[1] - tar_x_y[1] > 1 and colour == 'cyan':
-            return 'illegal'
-        elif curr_x_y[1] - tar_x_y[1] < -1 and colour == 'yellow':
+        if abs(curr_x_y[1] - tar_x_y[1]) != 1:
             return 'illegal'
     elif board.squares[curr_pos].initial_pos:
-        if curr_x_y[1] - tar_x_y[1] > 2 and colour == 'cyan':
-            return 'illegal'
-        elif curr_x_y[1] - tar_x_y[1] < -2 and colour == 'yellow':
+        if abs(curr_x_y[1] - tar_x_y[1]) > 2:
             return 'illegal'
 
     # Take piece diagonally
@@ -217,12 +232,14 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
         result = bishop_rules(curr_pos, tar_pos)
     elif board.squares[curr_pos].type == 'king':
         result = king_rules(curr_pos, tar_pos)
+    elif board.squares[curr_pos].type == 'queen':
+        result = queen_rules(curr_pos, tar_pos)
 
     if result == 'illegal':
         return result
     else:
         # move or take
-        if board.squares[tar_pos] != '':
+        if board.squares[tar_pos] == '':
             return 'move'
         else:
             return 'take'
@@ -312,19 +329,11 @@ def player_move(team):
     curr_pos = get_piece_to_move()#input('Piece to move: ')
     tar_pos = get_target_position()#input('Move to: ')
 
-    if curr_pos == 'pp':
-        print_pieces(cy_team)
-        print_pieces(ye_team)
-
     # convert user input to list element indices
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
 
-
-    # print('From {}'.format(curr_x_y))
-    # print('To {}'.format(tar_x_y))
     result = check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y)
-    # print('result of check_move is: {}'.format(result))
 
     return result, curr_pos, tar_pos, curr_x_y, tar_x_y
 
