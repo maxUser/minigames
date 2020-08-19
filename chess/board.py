@@ -23,6 +23,7 @@ class Board:
                'g1':'', 'g2':'', 'g3':'', 'g4':'', 'g5':'', 'g6':'', 'g7':'', 'g8':'',
                'h1':'', 'h2':'', 'h3':'', 'h4':'', 'h5':'', 'h6':'', 'h7':'', 'h8':''
                }
+
     board = [
                 ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
                 ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
@@ -33,6 +34,7 @@ class Board:
                 ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
                 ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
             ]
+
 
     def move_piece(self, curr_pos, tar_pos):
         self.squares[tar_pos] = self.squares[curr_pos]
@@ -56,9 +58,7 @@ class Board:
 
         self.initialize_squares()
 
-
     def initialize_squares(self):
-        default_pos = [-1, -1]
         cyan_pawn = re.compile('[a-h]2')
         cyan_rook = re.compile('(a1|h1)')
         cyan_knight = re.compile('(b1|g1)')
@@ -70,41 +70,41 @@ class Board:
 
         for square in self.squares.keys():
             if cyan_pawn.match(square):
-                t_pawn = Piece('pawn', 'cyan', default_pos)
+                t_pawn = Piece('pawn', 'cyan')
                 self.squares[square] = t_pawn
             elif cyan_rook.match(square):
-                t_rook = Piece('rook', 'cyan', default_pos)
+                t_rook = Piece('rook', 'cyan')
                 self.squares[square] = t_rook
             elif cyan_knight.match(square):
-                t_knight = Piece('knight', 'cyan', default_pos)
+                t_knight = Piece('knight', 'cyan')
                 self.squares[square] = t_knight
             elif cyan_bishop.match(square):
-                t_bishop = Piece('bishop', 'cyan', default_pos)
+                t_bishop = Piece('bishop', 'cyan')
                 self.squares[square] = t_bishop
             elif square == 'e1':
-                t_king = Piece('king', 'cyan', default_pos)
+                t_king = Piece('king', 'cyan')
                 self.squares[square] = t_king
             elif square == 'd1':
-                t_queen = Piece('queen', 'cyan', default_pos)
+                t_queen = Piece('queen', 'cyan')
                 self.squares[square] = t_queen
 
             elif yellow_pawn.match(square):
-                t_pawn = Piece('pawn', 'yellow', default_pos)
+                t_pawn = Piece('pawn', 'yellow')
                 self.squares[square] = t_pawn
             elif yellow_rook.match(square):
-                t_rook = Piece('rook', 'yellow', default_pos)
+                t_rook = Piece('rook', 'yellow')
                 self.squares[square] = t_rook
             elif yellow_knight.match(square):
-                t_knight = Piece('knight', 'yellow', default_pos)
+                t_knight = Piece('knight', 'yellow')
                 self.squares[square] = t_knight
             elif yellow_bishop.match(square):
-                t_bishop = Piece('bishop', 'yellow', default_pos)
+                t_bishop = Piece('bishop', 'yellow')
                 self.squares[square] = t_bishop
             elif square == 'e8':
-                t_king = Piece('king', 'yellow', default_pos)
+                t_king = Piece('king', 'yellow')
                 self.squares[square] = t_king
             elif square == 'd8':
-                t_queen = Piece('queen', 'yellow', default_pos)
+                t_queen = Piece('queen', 'yellow')
                 self.squares[square] = t_queen
 
 
@@ -113,17 +113,13 @@ class Board:
             print(key, end=' ')
             print(value)
 
-
-
     def print_square(self, pos):
         return self.board[pos[1]][pos[0]]
-
 
     def alter(self, old_pos, new_pos):
         piece = self.board[old_pos[1]][old_pos[0]]
         self.board[old_pos[1]][old_pos[0]] = ' '
         self.board[new_pos[1]][new_pos[0]] = piece
-
 
     def print_board(self):
         x_axis = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
