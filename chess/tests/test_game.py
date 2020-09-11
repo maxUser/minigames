@@ -150,16 +150,11 @@ def selectH8():
     return 'h8'
 
 
-class TestMovement:
-    """
-        Notes: Call board.reset_game() at the start of every test
-    """
+class TestUtility:
 
-    """
-    UTILITY TESTS
-    """
     @pytest.mark.yBetween
-    def test_get_between_lateral(self):
+    def test_get_between_straight(self):
+        print('ybetween')
         betweeners = get_y_between(['1', '7'])
         assert betweeners == [2,3,4,5,6,7]
 
@@ -167,6 +162,12 @@ class TestMovement:
     def test_get_between_lateral(self):
         betweeners = get_x_between(['a', 'h'])
         assert betweeners == ['b', 'c', 'd', 'e', 'f', 'g', 'h']
+
+
+class TestMovement:
+    """
+        Notes: Call board.reset_game() at the start of every test
+    """
 
     """
     QUEEN TESTS
