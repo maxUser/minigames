@@ -67,41 +67,41 @@ class Board:
 
         for square in self.squares.keys():
             if cyan_pawn.match(square):
-                t_pawn = Piece('pawn', 'cyan')
+                t_pawn = Piece('pawn', 'cyan', square)
                 self.squares[square] = t_pawn
             elif cyan_rook.match(square):
-                t_rook = Piece('rook', 'cyan')
+                t_rook = Piece('rook', 'cyan', square)
                 self.squares[square] = t_rook
             elif cyan_knight.match(square):
-                t_knight = Piece('knight', 'cyan')
+                t_knight = Piece('knight', 'cyan', square)
                 self.squares[square] = t_knight
             elif cyan_bishop.match(square):
-                t_bishop = Piece('bishop', 'cyan')
+                t_bishop = Piece('bishop', 'cyan', square)
                 self.squares[square] = t_bishop
             elif square == 'e1':
-                t_king = Piece('king', 'cyan')
+                t_king = Piece('king', 'cyan', square)
                 self.squares[square] = t_king
             elif square == 'd1':
-                t_queen = Piece('queen', 'cyan')
+                t_queen = Piece('queen', 'cyan', square)
                 self.squares[square] = t_queen
 
             elif yellow_pawn.match(square):
-                t_pawn = Piece('pawn', 'yellow')
+                t_pawn = Piece('pawn', 'yellow', square)
                 self.squares[square] = t_pawn
             elif yellow_rook.match(square):
-                t_rook = Piece('rook', 'yellow')
+                t_rook = Piece('rook', 'yellow', square)
                 self.squares[square] = t_rook
             elif yellow_knight.match(square):
-                t_knight = Piece('knight', 'yellow')
+                t_knight = Piece('knight', 'yellow', square)
                 self.squares[square] = t_knight
             elif yellow_bishop.match(square):
-                t_bishop = Piece('bishop', 'yellow')
+                t_bishop = Piece('bishop', 'yellow', square)
                 self.squares[square] = t_bishop
             elif square == 'e8':
-                t_king = Piece('king', 'yellow')
+                t_king = Piece('king', 'yellow', square)
                 self.squares[square] = t_king
             elif square == 'd8':
-                t_queen = Piece('queen', 'yellow')
+                t_queen = Piece('queen', 'yellow', square)
                 self.squares[square] = t_queen
 
 

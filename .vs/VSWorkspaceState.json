@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\chess",
+    "\\chess\\tests",
+    "\\chess\\utils"
+  ],
+  "SelectedNode": "\\chess\\utils\\board.py",
+  "PreviewInSolutionExplorer": false
+}
