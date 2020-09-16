@@ -5,8 +5,8 @@ import re
 
 class Board:
     """A representation of the board
-    - Left and bottom axes: what the player sees
-    - Top and right axes: what the computer sees
+    - Bottom and right axes: what the player sees
+    - Top and left axes: what the computer sees
       |0|1|2|3|4|5|6|7|
      0| | | | | | | | |8
      1| | | | | | | | |7
@@ -68,6 +68,7 @@ class Board:
         for square in self.squares.keys():
             if cyan_pawn.match(square):
                 t_pawn = Piece('pawn', 'cyan', square)
+                t_pawn.calculate_threat()
                 self.squares[square] = t_pawn
             elif cyan_rook.match(square):
                 t_rook = Piece('rook', 'cyan', square)
@@ -87,6 +88,7 @@ class Board:
 
             elif yellow_pawn.match(square):
                 t_pawn = Piece('pawn', 'yellow', square)
+                t_pawn.calculate_threat()
                 self.squares[square] = t_pawn
             elif yellow_rook.match(square):
                 t_rook = Piece('rook', 'yellow', square)

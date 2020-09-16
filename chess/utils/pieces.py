@@ -1,3 +1,5 @@
+from utils.helper import (y_flip, letter_to_number, number_to_letter)
+
 class Piece:
     # every piece must carry with it the squares that it threatens.
     # no this cannot work because the squares a piece threatens changes if another piece is in the way.
@@ -8,18 +10,58 @@ class Piece:
     # we still require each piece to hold a list of squares it threatens so we can update the threatened squares
     # in the team object.
 
-    initial_pos = True
-    threatened = False
-    threatening = []
-
     def __str__(self):
         return self.team + ' ' + self.type + ' @ ' + self.pos
 
     def __init__(self, type, team, pos):
         """
-        type (str): ex. pawn, rook, knight, bishop, king, or queen
-        team (str): ex. cyan, yellow
+            type (str): ex. pawn, rook, knight, bishop, king, or queen
+            team (str): ex. cyan, yellow
+            pos (str): ex. b2
+            initial_pos (bool): if the piece has moved or not
+            threatened (bool): if the piece is in danger of being taken
+            threatening (list): all squares this piece threatens determined by its current position
         """
         self.type = type
         self.team = team
         self.pos = pos
+        self.threatening = []
+        self.initial_pos = True
+        self.threatened = False
+
+    def calculate_threat(self):
+        """ this needs to be called every time a piece is moved
+        """
+        x = letter_to_number(self.pos[0])
+        y = y_flip(self.pos[1])
+        if self.type == 'pawn':
+            if self.team == 'cyan':
+                up_left = ()
+                up_right = ()
+                if x-1 > -1:
+                    up_left = (number_to_letter(x-1) + str(y_flip(y-1)))
+                if x+1 < 8:
+                    up_right = (number_to_letter(x+1) + str(y_flip(y-1)))
+                
+                if up_left:
+                    self.threatening.append(up_left)
+                if up_right:
+                    self.threatening.append(up_right)
+            elif self.team == 'yellow':
+                down_left = ()
+                down_right = ()
+                if x-1 > -1:
+                    down_left = (number_to_letter(x-1) + str(y_flip(y+1)))
+                if x+1 < 8:
+                    down_right = (number_to_letter(x+1) + str(y_flip(y+1)))
+                
+                if down_left:
+                    self.threatening.append(down_left)
+                if down_right:
+                    self.threatening.append(down_right)
+        
+        print(self.pos, self.threatening)
+
+        
+        
+

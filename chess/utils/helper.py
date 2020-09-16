@@ -1,26 +1,6 @@
-def y_flip(y):
-    y = int(y)
-    if y == 1:
-        return 7
-    elif y == 2:
-        return 6
-    elif y == 3:
-        return 5
-    elif y == 4:
-        return 4
-    elif y == 5:
-        return 3
-    elif y == 6:
-        return 2
-    elif y == 7:
-        return 1
-    elif y == 8:
-        return 0
-
-
 def get_x_between(exes):
     """
-    EG. pos1=a1, pos2=d4
+    EG. x1=a1, x2=d4
     returns [b2, c3]
     """
     x = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
@@ -60,6 +40,25 @@ def get_y_between(whys):
         return between
     else:
         return whys
+
+def y_flip(y):
+    y = int(y)
+    if y == 1:
+        return 7
+    elif y == 2:
+        return 6
+    elif y == 3:
+        return 5
+    elif y == 4:
+        return 4
+    elif y == 5:
+        return 3
+    elif y == 6:
+        return 2
+    elif y == 7:
+        return 1
+    elif y == 8:
+        return 0
 
 def letter_to_number(c):
     c = c.lower()
