@@ -154,7 +154,7 @@ def get_oppo_team(curr_team):
 def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     """
     The logic: check if move is illegal, if not determine
-                whether it is a take or move.
+               whether it is a take or move action.
     """
 
     colour = team.colour
@@ -280,8 +280,8 @@ def player_move(team):
     curr_pos = get_piece_to_move()
     tar_pos = get_target_position()
 
-    print(get_x_between([curr_pos[0], tar_pos[0]]))
-    print(get_y_between([curr_pos[1], tar_pos[1]]))
+    #print(get_x_between([curr_pos[0], tar_pos[0]]))
+    #print(get_y_between([curr_pos[1], tar_pos[1]]))
 
     # convert user input to list element indices
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
@@ -318,26 +318,35 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
 
     elif result == 'take':
         print('Taking piece at: ' + tar_pos)
-        board.alter(curr_x_y, tar_x_y)
+        if board.squares[curr_pos].initial_pos == True:
+            board.squares[curr_pos].initial_pos = False
 
-        # add piece to team's graveyard
-        team.graveyard.append(board.squares[tar_pos])
-        # remove current piece occupying square
-        board.squares[tar_pos] = board.squares[curr_pos]
-        # update the piece's board position
-        board.squares[curr_pos].pos = tar_pos
-        
-        board.squares[curr_pos] = ''
+        # update print out of board
+        board.alter(curr_x_y, tar_x_y)
+        # add taken piece to opposing team's graveyard
+        get_oppo_team(team.colour).graveyard.append(board.squares[tar_pos])
+        # remove position from taken piece
+        board.squares[tar_pos].pos = 'graveyard'
+        # update internal representation of board
+        board.move_piece(curr_pos, tar_pos)
+
+        print('threatening ', board.squares[tar_pos].threatening)
+
+
         return 1
 
     elif result == 'move':
         print('Moving {} to {}'.format(curr_pos, tar_pos))
-        board.alter(curr_x_y, tar_x_y)
-
-        board.squares[curr_pos].initial_pos = False
-        board.squares[curr_pos].pos = tar_pos
+        if board.squares[curr_pos].initial_pos == True:
+            board.squares[curr_pos].initial_pos = False
         
+        # update print out of board
+        board.alter(curr_x_y, tar_x_y)
+        # update internal representation of board
         board.move_piece(curr_pos, tar_pos)
+
+        print('threatening ', board.squares[tar_pos].threatening)
+
         return 1
 
 def run_game():
