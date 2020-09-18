@@ -97,13 +97,13 @@ def number_to_letter(n):
     elif n == 7:
         return 'h'
 
-
-
 def print_error(msg):
     print('ERROR:\n***\n{}\n***'.format(msg))
 
 def get_piece_to_move():
+    # used in testing
     return input('Piece to move: ')
 
 def get_target_position():
+    # used in testing
     return input('Move to: ')
