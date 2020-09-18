@@ -163,8 +163,32 @@ class TestUtility:
         betweeners = get_x_between(['a', 'h'])
         assert betweeners == ['b', 'c', 'd', 'e', 'f', 'g', 'h']
 
+    @pytest.mark.take
+    def test_taking_pieces(self, monkeypatch):
+        board.reset_game()
 
-class TestMovement:
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
+        monkeypatch.setattr(game, 'get_target_position', selectD4)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
+        monkeypatch.setattr(game, 'get_target_position', selectE5)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD4)
+        monkeypatch.setattr(game, 'get_target_position', selectE5)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        assert result == 1
+
+
+
+
+
+class TestPieceMovement:
     """
         Notes: Call board.reset_game() at the start of every test
     """
