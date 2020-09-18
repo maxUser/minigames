@@ -30,8 +30,14 @@ class Piece:
         self.threatened = False
 
     def calculate_threat(self):
-        """ this needs to be called every time a piece is moved
+        """ this function needs to be called every time a piece is moved
         """
+
+        if self.threatening:
+            # TODO: update team threat here
+            self.threatening = []
+        
+
         x = letter_to_number(self.pos[0])
         y = y_flip(self.pos[1])
         if self.type == 'pawn':
@@ -59,9 +65,3 @@ class Piece:
                     self.threatening.append(down_left)
                 if down_right:
                     self.threatening.append(down_right)
-        
-        print(self.pos, self.threatening)
-
-        
-        
-

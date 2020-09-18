@@ -118,8 +118,10 @@ class Board:
     def move_piece(self, curr_pos, tar_pos):
         """ Change the internal representation of the board
         """
+        self.squares[curr_pos].pos = tar_pos
         self.squares[tar_pos] = self.squares[curr_pos]
         self.squares[curr_pos] = ''
+        self.squares[tar_pos].calculate_threat()
 
     def alter(self, curr_pos, tar_pos):
         """ Change the print out of the board
