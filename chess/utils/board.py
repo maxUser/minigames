@@ -5,17 +5,17 @@ import re
 
 class Board:
     """A representation of the board
-    - Bottom and right axes: what the player sees
-    - Top and left axes: what the computer sees
+    - Bottom and left axes: what the player sees
+    - Top and right axes: what the computer sees
       |0|1|2|3|4|5|6|7|
-     0| | | | | | | | |8
-     1| | | | | | | | |7
-     2| | | | | | | | |6
-     3| | | | | | | | |5
-     4| | | | | | | | |4
-     5| | | | | | | | |3
-     6| | | | | | | | |2
+     8| | | | | | | | |0
      7| | | | | | | | |1
+     6| | | | | | | | |2
+     5| | | | | | | | |3
+     4| | | | | | | | |4
+     3| | | | | | | | |5
+     2| | | | | | | | |6
+     1| | | | | | | | |7
        a b c d e f g h
     """
     squares = {'a1':'', 'a2':'', 'a3':'', 'a4':'', 'a5':'', 'a6':'', 'a7':'', 'a8':'',
@@ -68,10 +68,11 @@ class Board:
         for square in self.squares.keys():
             if cyan_pawn.match(square):
                 t_pawn = Piece('pawn', 'cyan', square)
-                t_pawn.calculate_threat()
+                #t_pawn.calculate_threat(self.squares)
                 self.squares[square] = t_pawn
             elif cyan_rook.match(square):
                 t_rook = Piece('rook', 'cyan', square)
+                #t_rook.calculate_threat(self.squares)
                 self.squares[square] = t_rook
             elif cyan_knight.match(square):
                 t_knight = Piece('knight', 'cyan', square)
@@ -88,10 +89,11 @@ class Board:
 
             elif yellow_pawn.match(square):
                 t_pawn = Piece('pawn', 'yellow', square)
-                t_pawn.calculate_threat()
+                #t_pawn.calculate_threat(self.squares)
                 self.squares[square] = t_pawn
             elif yellow_rook.match(square):
                 t_rook = Piece('rook', 'yellow', square)
+                #t_rook.calculate_threat(self.squares)
                 self.squares[square] = t_rook
             elif yellow_knight.match(square):
                 t_knight = Piece('knight', 'yellow', square)
@@ -121,7 +123,7 @@ class Board:
         self.squares[curr_pos].pos = tar_pos
         self.squares[tar_pos] = self.squares[curr_pos]
         self.squares[curr_pos] = ''
-        self.squares[tar_pos].calculate_threat()
+        self.squares[tar_pos].calculate_threat(self.squares)
 
     def alter(self, curr_pos, tar_pos):
         """ Change the print out of the board

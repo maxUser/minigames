@@ -330,7 +330,7 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         # update internal representation of board
         board.move_piece(curr_pos, tar_pos)
 
-        print('threatening ', board.squares[tar_pos].threatening)
+        print('{} threatening {}'.format(board.squares[tar_pos], board.squares[tar_pos].threatening))
 
 
         return 1
@@ -345,7 +345,7 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         # update internal representation of board
         board.move_piece(curr_pos, tar_pos)
 
-        print('threatening ', board.squares[tar_pos].threatening)
+        print('{} threatening {}'.format(board.squares[tar_pos], board.squares[tar_pos].threatening))
 
         return 1
 

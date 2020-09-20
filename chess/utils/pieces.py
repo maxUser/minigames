@@ -1,4 +1,5 @@
-from utils.helper import (y_flip, letter_to_number, number_to_letter)
+from utils.helper import (y_flip, letter_to_number, number_to_letter,
+                         get_x_threat, get_y_threat)
 
 class Piece:
     # every piece must carry with it the squares that it threatens.
@@ -29,7 +30,7 @@ class Piece:
         self.initial_pos = True
         self.threatened = False
 
-    def calculate_threat(self):
+    def calculate_threat(self, squares):
         """ this function needs to be called every time a piece is moved
         """
 
@@ -65,3 +66,11 @@ class Piece:
                     self.threatening.append(down_left)
                 if down_right:
                     self.threatening.append(down_right)
+        
+        elif self.type == 'rook':
+            for threatened_square in get_x_threat(self.team, self.pos, squares):
+                self.threatening.append(threatened_square)
+            for threatened_square in get_y_threat(self.team, self.pos, squares):
+                self.threatening.append(threatened_square)
+            #print(get_y_threat(self.pos, squares))
+            #print(self.threatening)

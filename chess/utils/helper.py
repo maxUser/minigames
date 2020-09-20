@@ -1,3 +1,70 @@
+def get_y_threat(team, pos, squares):
+    """ return every square threatened in the y direction
+        up to and including the first piece encountered.
+    """
+    y_threats = []
+
+    for i in range(y_flip(pos[1])-1, -1, -1):
+        # get all squares above
+        position = pos[0] + str(y_flip(i))
+        if squares[position] != '':
+            # we want to add the first square encountered as a threatened
+            # square if it is from the opposite team
+            if squares[position].team == team:
+                break
+            else:
+                y_threats.append(position)
+                break
+        else:
+            y_threats.append(position)
+    for i in range(y_flip(pos[1])+1, 8):
+        # get all squares below
+        position = pos[0] + str(y_flip(i))
+        print(position)
+        if squares[position] != '':
+            if squares[position].team == team:
+                break
+            else:
+                y_threats.append(position)
+                break
+        else:
+            y_threats.append(position)
+
+    return y_threats
+
+def get_x_threat(colour, pos, squares):
+    """ return every square threatened in the x direction
+        up to and including the first piece encountered.
+    """
+    x_threats = []
+
+    for i in range(letter_to_number(pos[0])+1, 8):
+        # get all sqaures to the right
+        position = number_to_letter(i) + pos[1]
+        if squares[position] != '':
+            # we want to add the first square encountered as a threatened
+            # square if it is from the opposite team
+            if squares[position].team == team:
+                break
+            else:
+                x_threats.append(position)
+                break
+        else:
+            x_threats.append(position)
+    for i in range(letter_to_number(pos[0])-1, -1, -1):
+        # get all sqaures to the left
+        position = number_to_letter(i) + pos[1]
+        if squares[position] != '':
+            if squares[position].team == team:
+                break
+            else:
+                x_threats.append(position)
+                break
+        else:
+            x_threats.append(number_to_letter(i) + pos[1])
+
+    return x_threats
+
 def get_x_between(exes):
     """
     EG. x1=a1, x2=d4
@@ -98,6 +165,7 @@ def number_to_letter(n):
         return 'h'
 
 def print_error(msg):
+    # print error message
     print('ERROR:\n***\n{}\n***'.format(msg))
 
 def get_piece_to_move():
