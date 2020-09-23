@@ -146,12 +146,6 @@ def pawn_rules(colour, curr_pos, tar_pos):
 
     return None
 
-def get_oppo_team(curr_team):
-    if curr_team.colour == 'cyan':
-        return board.ye_team
-    elif curr_team.colour == 'yellow':
-        return board.cy_team
-
 def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     """
     The logic: check if move is illegal, if not determine

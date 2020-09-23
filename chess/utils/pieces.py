@@ -1,5 +1,5 @@
 from utils.helper import (y_flip, letter_to_number, number_to_letter,
-                         get_x_threat, get_y_threat)
+                         get_x_threat, get_y_threat, get_L_threat)
 
 class Piece:
 
@@ -25,9 +25,9 @@ class Piece:
     def calculate_threat(self, squares):
         """ this function needs to be called every time a piece is moved
         """
-        old_threatening = []
+        #old_threatening = []
         if self.threatening:
-            old_threatening = self.threatening
+            #old_threatening = self.threatening
             self.threatening = []
        
         x = letter_to_number(self.pos[0])
@@ -66,5 +66,5 @@ class Piece:
                 self.threatening.append(threatened_square)
         
         elif self.type == 'knight':
-            pass
+            print('{}: {}'.format(self.pos, get_L_threat(self.team, self.pos, squares)))
         

@@ -1,3 +1,27 @@
+def get_L_threat(team, pos, squares):
+    """ For knights
+    """
+    x = letter_to_number(pos[0])
+    y = int(pos[1])
+    threats = []
+    
+    dirs = [(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2)]
+    
+    for pair in dirs:
+        m = x + pair[0]
+        n = y + pair[1]
+
+        if m < 0 or m > 7 or n < 1 or n > 8:
+            continue  
+        else:
+            if squares[number_to_letter(m) + str(n)]:
+                if squares[number_to_letter(m) + str(n)].team.colour == team.colour:
+                    continue
+            threats.append(number_to_letter(m) + str(n))
+
+
+    return threats
+
 def get_y_threat(team, pos, squares):
     """ return every square threatened in the y direction
         up to and including the first piece encountered.
@@ -42,8 +66,7 @@ def get_y_threat(team, pos, squares):
 
     #print('{}: {}'.format(pos, y_threats))
 
-    return y_threats
-    
+    return y_threats 
 
 def get_x_threat(team, pos, squares):
     """ return every square threatened in the x direction
@@ -165,6 +188,25 @@ def letter_to_number(c):
     elif c == 'h':
         return 7
 
+def letter_to_number_real(c):
+    c = c.lower()
+    if c == 'a':
+        return 1
+    elif c == 'b':
+        return 2
+    elif c == 'c':
+        return 3
+    elif c == 'd':
+        return 4
+    elif c == 'e':
+        return 5
+    elif c == 'f':
+        return 6
+    elif c == 'g':
+        return 7
+    elif c == 'h':
+        return 8
+
 def number_to_letter(n):
     if n == 0:
         return 'a'
@@ -188,9 +230,9 @@ def print_error(msg):
     print('ERROR:\n***\n{}\n***'.format(msg))
 
 def get_piece_to_move():
-    # used in testing
+    # required for testing
     return input('Piece to move: ')
 
 def get_target_position():
-    # used in testing
+    # required for testing
     return input('Move to: ')
