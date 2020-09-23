@@ -1,11 +1,10 @@
 class Team:
-    # still need algorithm to determine which squares a piece threatens given its current position.
-    # store all squares threatened by a team here
 
     def __init__(self, colour):
         self.colour = colour
         self.graveyard = []
         self.threatening = []
+        self.pieces = []
 
 
     def add_threat(self, threat_list):
@@ -14,4 +13,8 @@ class Team:
 
     def remove_threat(self, threat_list):
         for free_square in threat_list:
-            self.threatening.remove(free_square)
+            if free_square in self.threatening:
+                self.threatening.remove(free_square)
+    
+    def add_piece(self, piece):
+        self.pieces.append(piece)

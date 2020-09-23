@@ -4,64 +4,83 @@ def get_y_threat(team, pos, squares):
     """
     y_threats = []
 
-    for i in range(y_flip(pos[1])-1, -1, -1):
-        # get all squares above
-        position = pos[0] + str(y_flip(i))
-        if squares[position] != '':
-            # we want to add the first square encountered as a threatened
-            # square if it is from the opposite team
-            if squares[position].team == team:
-                break
-            else:
-                y_threats.append(position)
-                break
-        else:
+    for i in range(int(pos[1])+1, 9):
+        """ Squares above
+            int(pos[1])+1 because you don't threaten your own square
+        """
+        position = pos[0] + str(i)
+        if squares[position] and squares[position].team.colour != team.colour:
+            """ If first encountered taken square contains opponent, 
+                add to threat and break
+            """
             y_threats.append(position)
-    for i in range(y_flip(pos[1])+1, 8):
-        # get all squares below
-        position = pos[0] + str(y_flip(i))
-        print(position)
-        if squares[position] != '':
-            if squares[position].team == team:
-                break
-            else:
-                y_threats.append(position)
-                break
-        else:
+            break
+        elif squares[position] and squares[position].team.colour == team.colour:
+            """ If first encountered taken square contains ally,
+                do not add to threat and break
+            """
+            break
+        y_threats.append(position)
+    
+    for i in range(int(pos[1])-1, 0, -1):
+        """ Squares below
+            int(pos[1])-1 because you don't threaten your own square
+        """
+        position = pos[0] + str(i)
+        if squares[position] and squares[position].team.colour != team.colour:
+            """ If first encountered taken square contains opponent, 
+                add to threat and break
+            """
             y_threats.append(position)
+            break
+        elif squares[position] and squares[position].team.colour == team.colour:
+            """ If first encountered taken square contains ally,
+                do not add to threat and break
+            """
+            break
+        y_threats.append(position)
+
+    #print('{}: {}'.format(pos, y_threats))
 
     return y_threats
+    
 
-def get_x_threat(colour, pos, squares):
+def get_x_threat(team, pos, squares):
     """ return every square threatened in the x direction
         up to and including the first piece encountered.
     """
     x_threats = []
 
     for i in range(letter_to_number(pos[0])+1, 8):
-        # get all sqaures to the right
+        # get all squares to the right
         position = number_to_letter(i) + pos[1]
-        if squares[position] != '':
-            # we want to add the first square encountered as a threatened
-            # square if it is from the opposite team
-            if squares[position].team == team:
-                break
-            else:
-                x_threats.append(position)
-                break
-        else:
+        if squares[position] and squares[position].team.colour != team.colour:
+            """ If first encountered taken square contains opponent, 
+                add to threat and break
+            """
             x_threats.append(position)
+            break
+        elif squares[position] and squares[position].team.colour == team.colour:
+            """ If first encountered taken square contains ally,
+                do not add to threat and break
+            """
+            break
+        x_threats.append(position)
     for i in range(letter_to_number(pos[0])-1, -1, -1):
-        # get all sqaures to the left
+        # get all squares to the left
         position = number_to_letter(i) + pos[1]
-        if squares[position] != '':
-            if squares[position].team == team:
-                break
-            else:
-                x_threats.append(position)
-                break
-        else:
-            x_threats.append(number_to_letter(i) + pos[1])
+        if squares[position] and squares[position].team.colour != team.colour:
+            """ If first encountered taken square contains opponent, 
+                add to threat and break
+            """
+            x_threats.append(position)
+            break
+        elif squares[position] and squares[position].team.colour == team.colour:
+            """ If first encountered taken square contains ally,
+                do not add to threat and break
+            """
+            break
+        x_threats.append(position)
 
     return x_threats
 

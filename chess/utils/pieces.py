@@ -2,17 +2,9 @@ from utils.helper import (y_flip, letter_to_number, number_to_letter,
                          get_x_threat, get_y_threat)
 
 class Piece:
-    # every piece must carry with it the squares that it threatens.
-    # no this cannot work because the squares a piece threatens changes if another piece is in the way.
-    # this is only a problem for: rook, queen, bishop since they threaten squares in a continuous line.
-    # solution: set the threatened squares for these pieces to be ...
-    # we don't need to know what piece threatens a square, only that it is threatened. this means each team can
-    # store the squares it threatens.
-    # we still require each piece to hold a list of squares it threatens so we can update the threatened squares
-    # in the team object.
 
     def __str__(self):
-        return self.team + ' ' + self.type + ' @ ' + self.pos
+        return self.team.colour + ' ' + self.type + ' @ ' + self.pos
 
     def __init__(self, type, team, pos):
         """
@@ -33,16 +25,15 @@ class Piece:
     def calculate_threat(self, squares):
         """ this function needs to be called every time a piece is moved
         """
-
+        old_threatening = []
         if self.threatening:
-            # TODO: update team threat here
+            old_threatening = self.threatening
             self.threatening = []
-        
-
+       
         x = letter_to_number(self.pos[0])
         y = y_flip(self.pos[1])
         if self.type == 'pawn':
-            if self.team == 'cyan':
+            if self.team.colour == 'cyan':
                 up_left = ()
                 up_right = ()
                 if x-1 > -1:
@@ -54,7 +45,8 @@ class Piece:
                     self.threatening.append(up_left)
                 if up_right:
                     self.threatening.append(up_right)
-            elif self.team == 'yellow':
+                
+            elif self.team.colour == 'yellow':
                 down_left = ()
                 down_right = ()
                 if x-1 > -1:
@@ -72,5 +64,7 @@ class Piece:
                 self.threatening.append(threatened_square)
             for threatened_square in get_y_threat(self.team, self.pos, squares):
                 self.threatening.append(threatened_square)
-            #print(get_y_threat(self.pos, squares))
-            #print(self.threatening)
+        
+        elif self.type == 'knight':
+            pass
+        

@@ -1,17 +1,18 @@
 from utils.pieces import Piece
 from utils.board import Board
 from utils.teams import Team
+from termcolor import colored
 from utils.helper import (y_flip, get_x_between, get_y_between,
                           letter_to_number, number_to_letter,
                           print_error, get_piece_to_move,
                           get_target_position)
 
-from termcolor import colored
+
 
 
 board = Board()
-ye_team = Team('yellow')
-cy_team = Team('cyan')
+#ye_team = board.ye_team
+#cy_team = board.cy_team
 
 def queen_rules(curr_pos, tar_pos):
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
@@ -146,19 +147,17 @@ def pawn_rules(colour, curr_pos, tar_pos):
     return None
 
 def get_oppo_team(curr_team):
-    if curr_team == 'cyan':
-        return ye_team
-    elif curr_team == 'yellow':
-        return cy_team
+    if curr_team.colour == 'cyan':
+        return board.ye_team
+    elif curr_team.colour == 'yellow':
+        return board.cy_team
 
 def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     """
     The logic: check if move is illegal, if not determine
                whether it is a take or move action.
     """
-
     colour = team.colour
-    oppo_team = get_oppo_team(colour)
     result = 'no_result'
 
     # check if input matches a valid board square
@@ -166,7 +165,7 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
         return 'invalid_input'
 
     # player selected empty square or player trying to move wrong team
-    if board.squares[curr_pos] == '' or colour != board.squares[curr_pos].team:
+    if board.squares[curr_pos] == '' or colour != board.squares[curr_pos].team.colour:
         return 'selection_error'
 
     # friendly fire is off
@@ -268,7 +267,6 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     if result == 'illegal':
         return result
     else:
-        # move or take
         if board.squares[tar_pos] == '':
             return 'move'
         else:
@@ -286,7 +284,7 @@ def player_move(team):
     # convert user input to list element indices
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
-
+    #print('team: {} - {}'.format(team, team.colour))
     result = check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y)
 
     return result, curr_pos, tar_pos, curr_x_y, tar_x_y
@@ -323,12 +321,10 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
 
         # update print out of board
         board.alter(curr_x_y, tar_x_y)
-        # add taken piece to opposing team's graveyard
-        get_oppo_team(team.colour).graveyard.append(board.squares[tar_pos])
         # remove position from taken piece
         board.squares[tar_pos].pos = 'graveyard'
         # update internal representation of board
-        board.move_piece(curr_pos, tar_pos)
+        board.move_piece(curr_pos, tar_pos, team)
 
         print('{} threatening {}'.format(board.squares[tar_pos], board.squares[tar_pos].threatening))
 
@@ -343,26 +339,42 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         # update print out of board
         board.alter(curr_x_y, tar_x_y)
         # update internal representation of board
-        board.move_piece(curr_pos, tar_pos)
+        board.move_piece(curr_pos, tar_pos, team)   
 
-        print('{} threatening {}'.format(board.squares[tar_pos], board.squares[tar_pos].threatening))
+        #print('{} threatening {}'.format(board.squares[tar_pos], board.squares[tar_pos].threatening))
+        #print('All {} threats: {}'.format(team.colour, team.threatening))
 
         return 1
 
 def run_game():
+    
+    cy_team = Team('cyan')
+    ye_team = Team('yellow')
     teams = (cy_team, ye_team)
-
     win = False
     i = 0
-    move_history = {}
-    board.initialize_squares()
+
+    cy_team, ye_team = board.initialize_squares(teams)
+    
+    for team in teams:
+        for piece in team.pieces:
+            piece.calculate_threat(board.squares)
+            for threat in piece.threatening:
+                team.threatening.append(threat)
+        print('All {} threats: {}'.format(team.colour, team.threatening))
 
     while win is False:
         print()
         board.print_board()
+        print()
         team = teams[i%2]
+        # print('All {} threats: {}'.format(cy_team.colour, cy_team.threatening))
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(team)
+        if move_result == 'take':
+            # add taken piece to opposing team's graveyard
+            if team.colour == 'cyan':
+                ye_team.graveyard.append(board.squares[tar_pos])
+            elif team.colour == 'yellow':
+                cy_team.graveyard.append(board.squares[tar_pos])
         i += act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, team)
-        if move_result != 'illegal':
-            move_history[i] = (curr_pos, tar_pos)
-            
+        
