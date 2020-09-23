@@ -66,5 +66,6 @@ class Piece:
                 self.threatening.append(threatened_square)
         
         elif self.type == 'knight':
-            print('{}: {}'.format(self.pos, get_L_threat(self.team, self.pos, squares)))
+            for threatened_square in get_L_threat(self.team, self.pos, squares):
+                self.threatening.append(threatened_square)
         
