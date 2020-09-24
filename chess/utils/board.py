@@ -58,6 +58,10 @@ class Board:
         #self.initialize_squares()
 
     def initialize_squares(self, teams):
+        """
+            Args: 
+                teams: tuple containing both teams.
+        """
         cy_team = teams[0]
         ye_team = teams[1]
         cyan_pawn = re.compile('[a-h]2')
@@ -122,7 +126,6 @@ class Board:
                 self.squares[square] = t_queen
         return cy_team, ye_team
 
-
     def print_squares(self):
         for key, value in self.squares.items():
             print(key, end=' ')
@@ -137,7 +140,7 @@ class Board:
         self.squares[curr_pos].pos = tar_pos
         self.squares[tar_pos] = self.squares[curr_pos]
         self.squares[curr_pos] = ''
-        self.squares[tar_pos].calculate_threat(self.squares)
+        #self.squares[tar_pos].calculate_threat(self.squares)
         
 
     def alter(self, curr_pos, tar_pos):

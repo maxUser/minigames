@@ -1,5 +1,6 @@
 from utils.helper import (y_flip, letter_to_number, number_to_letter,
-                         get_x_threat, get_y_threat, get_L_threat)
+                         get_x_threat, get_y_threat, get_L_threat,
+                         get_diagonal_threat)
 
 class Piece:
 
@@ -67,5 +68,9 @@ class Piece:
         
         elif self.type == 'knight':
             for threatened_square in get_L_threat(self.team, self.pos, squares):
+                self.threatening.append(threatened_square)
+
+        elif self.type == 'bishop':
+            for threatened_square in get_diagonal_threat(self.team, self.pos, squares):
                 self.threatening.append(threatened_square)
         

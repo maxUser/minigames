@@ -1,9 +1,9 @@
 from utils.game import (player_move, y_flip, letter_to_number,
-                 check_move, pawn_rules, get_oppo_team,
-                 get_piece_to_move, get_target_position,
-                 act_on_result, get_x_between, get_y_between)
+                 check_move, get_piece_to_move, get_target_position,
+                 act_on_result, get_x_between, get_y_between, testing_environment)
 from utils.board import Board
 from utils.teams import Team
+from utils.helper import calculate_all_threat
 import utils.game as game
 import pytest
 
@@ -151,6 +151,43 @@ def selectH8():
 
 
 class TestUtility:
+    @pytest.mark.bishopThreat
+    def test_bishop_threat(self, monkeypatch):
+        teams, board = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
+        monkeypatch.setattr(game, 'get_target_position', selectD3)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectG7)
+        monkeypatch.setattr(game, 'get_target_position', selectG5)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectB2)
+        monkeypatch.setattr(game, 'get_target_position', selectD4)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectC1)
+        monkeypatch.setattr(game, 'get_target_position', selectF4)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        
+        teams = calculate_all_threat(teams, board)
+
+        for piece in teams[0].pieces:
+            if piece.threatening:
+                print('{}: {}'.format(piece, piece.threatening))
+            # if piece.type == 'bishop':
+            #     print('{}: {}'.format(piece, piece.threatening))
+
+        assert result == 0
+
+
     @pytest.mark.rookThreaty
     def test_rook_threat_y(self, monkeypatch):
         board.reset_game()

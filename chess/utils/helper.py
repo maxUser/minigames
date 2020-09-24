@@ -1,3 +1,39 @@
+def get_diagonal_threat(team, pos, squares):
+    # check in each direction until piece or edge encountered
+    dirs = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
+    x = letter_to_number(pos[0])
+    y = int(pos[1])
+    threats = []
+
+    for pair in dirs:
+        m = x + pair[0]
+        n = y + pair[1]
+        #print(pair)
+        while True:
+            """ Continuously add pair to position until piece or edge encountered
+            """
+            #print('m: {}, n: {}'.format(m, n))
+            if m < 0 or m > 7 or n < 1 or n > 8:
+                # Edge encountered
+                break
+            else:
+                if squares[number_to_letter(m) + str(n)]:
+                    if squares[number_to_letter(m) + str(n)].team.colour == team.colour:
+                        # Friendly piece encountered
+                        break
+                    elif squares[number_to_letter(m) + str(n)].team.colour != team.colour:
+                        # Opponent piece encountered
+                        threats.append(number_to_letter(m) + str(n))
+                        break
+                threats.append(number_to_letter(m) + str(n))
+                    
+                m = m + pair[0]
+                n = n + pair[1]
+    return threats
+
+
+
+
 def get_L_threat(team, pos, squares):
     """ For knights
     """
@@ -18,7 +54,6 @@ def get_L_threat(team, pos, squares):
                 if squares[number_to_letter(m) + str(n)].team.colour == team.colour:
                     continue
             threats.append(number_to_letter(m) + str(n))
-
 
     return threats
 
@@ -106,6 +141,15 @@ def get_x_threat(team, pos, squares):
         x_threats.append(position)
 
     return x_threats
+
+def calculate_all_threat(teams, board):
+    print('recalculating all threat')
+    for team in teams:
+        for piece in team.pieces:
+            piece.calculate_threat(board.squares)
+            for threat in piece.threatening:
+                team.threatening.append(threat)
+    return teams
 
 def get_x_between(exes):
     """
@@ -226,7 +270,6 @@ def number_to_letter(n):
         return 'h'
 
 def print_error(msg):
-    # print error message
     print('ERROR:\n***\n{}\n***'.format(msg))
 
 def get_piece_to_move():

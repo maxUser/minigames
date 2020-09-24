@@ -5,14 +5,12 @@ from termcolor import colored
 from utils.helper import (y_flip, get_x_between, get_y_between,
                           letter_to_number, number_to_letter,
                           print_error, get_piece_to_move,
-                          get_target_position)
+                          get_target_position, calculate_all_threat)
 
 
 
 
 board = Board()
-#ye_team = board.ye_team
-#cy_team = board.cy_team
 
 def queen_rules(curr_pos, tar_pos):
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
@@ -272,13 +270,10 @@ def player_move(team):
     curr_pos = get_piece_to_move()
     tar_pos = get_target_position()
 
-    #print(get_x_between([curr_pos[0], tar_pos[0]]))
-    #print(get_y_between([curr_pos[1], tar_pos[1]]))
-
     # convert user input to list element indices
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
-    #print('team: {} - {}'.format(team, team.colour))
+
     result = check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y)
 
     return result, curr_pos, tar_pos, curr_x_y, tar_x_y
@@ -340,6 +335,16 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
 
         return 1
 
+def testing_environment():
+    cy_team = Team('cyan')
+    ye_team = Team('yellow')
+    teams = (cy_team, ye_team)
+    cy_team, ye_team = board.initialize_squares(teams)
+    teams = calculate_all_threat(teams, board)
+
+    return teams, board
+
+
 def run_game():
     
     cy_team = Team('cyan')
@@ -350,19 +355,18 @@ def run_game():
 
     cy_team, ye_team = board.initialize_squares(teams)
     
+    teams = calculate_all_threat(teams, board)
     for team in teams:
-        for piece in team.pieces:
-            piece.calculate_threat(board.squares)
-            for threat in piece.threatening:
-                team.threatening.append(threat)
         print('All {} threats: {}'.format(team.colour, team.threatening))
+        for piece in team.pieces:
+            print('{} threatening: {}'.format(piece, piece.threatening))
 
     while win is False:
         print()
         board.print_board()
         print()
         team = teams[i%2]
-        # print('All {} threats: {}'.format(cy_team.colour, cy_team.threatening))
+
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(team)
         if move_result == 'take':
             # add taken piece to opposing team's graveyard
@@ -370,5 +374,10 @@ def run_game():
                 ye_team.graveyard.append(board.squares[tar_pos])
             elif team.colour == 'yellow':
                 cy_team.graveyard.append(board.squares[tar_pos])
+            teams = calculate_all_threat(teams, board)
+        elif move_result == 'move':
+            # threat needs to be calculated every time a piece moves
+            teams = calculate_all_threat(teams, board)
+            
         i += act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, team)
         
