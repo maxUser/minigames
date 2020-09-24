@@ -369,7 +369,7 @@ def run_game():
 
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(team)
         i += act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, team)
-
+        
         if move_result == 'take':
             # add taken piece to opposing team's graveyard
             if team.colour == 'cyan':

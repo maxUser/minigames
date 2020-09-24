@@ -151,6 +151,50 @@ def selectH8():
 
 
 class TestUtility:
+    @pytest.mark.kingThreat
+    def test_king_threat(self, monkeypatch):
+        teams, board = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
+        monkeypatch.setattr(game, 'get_target_position', selectE4)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
+        monkeypatch.setattr(game, 'get_target_position', selectE2)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
+        monkeypatch.setattr(game, 'get_target_position', selectE3)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
+        monkeypatch.setattr(game, 'get_target_position', selectE5)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE8)
+        monkeypatch.setattr(game, 'get_target_position', selectE7)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
+        monkeypatch.setattr(game, 'get_target_position', selectE6)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+
+        teams = calculate_all_threat(teams, board)
+        for team in teams:
+            for piece in team.pieces:
+                if piece.type == 'king':
+                    print('{} threats: {}'.format(piece, piece.threatening))
+
+        assert result == 0
+
     @pytest.mark.bishopThreat
     def test_bishop_threat(self, monkeypatch):
         teams, board = testing_environment()

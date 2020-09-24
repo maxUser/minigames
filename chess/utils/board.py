@@ -139,9 +139,7 @@ class Board:
         """
         self.squares[curr_pos].pos = tar_pos
         self.squares[tar_pos] = self.squares[curr_pos]
-        self.squares[curr_pos] = ''
-        #self.squares[tar_pos].calculate_threat(self.squares)
-        
+        self.squares[curr_pos] = ''   
 
     def alter(self, curr_pos, tar_pos):
         """ Change the print out of the board

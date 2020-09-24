@@ -1,6 +1,7 @@
 from utils.helper import (y_flip, letter_to_number, number_to_letter,
                          get_x_threat, get_y_threat, get_L_threat,
-                         get_diagonal_threat, get_queen_threat)
+                         get_diagonal_threat, get_queen_threat,
+                         get_king_threat)
 
 class Piece:
 
@@ -75,5 +76,11 @@ class Piece:
                 self.threatening.append(threatened_square)
 
         elif self.type == 'queen':
-            print('{} {}: {}'.format(self.team.colour, self.type, get_queen_threat(self.team, self.pos, squares)))
+            for threatened_square in get_queen_threat(self.team, self.pos, squares):
+                self.threatening.append(threatened_square)
+
+        elif self.type == 'king':
+            for threatened_square in get_king_threat(self.team, self.pos, squares):
+                self.threatening.append(threatened_square)
+            #print('{} {} threats: {}'.format(self.team.colour, self.type, get_king_threat(self.team, self.pos, squares)))
         

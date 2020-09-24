@@ -1,3 +1,30 @@
+def get_king_threat(team, pos, squares):
+    x = letter_to_number(pos[0])
+    y = int(pos[1])
+    threats = []
+
+    dirs = [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]
+
+    for pair in dirs:
+        m = x + pair[0]
+        n = y + pair[1]
+        
+        if m < 0 or m > 7 or n < 1 or n > 8:
+            continue
+        else:
+            if squares[number_to_letter(m) + str(n)]:
+                # If square contains piece
+                if squares[number_to_letter(m) + str(n)].team.colour == team.colour:
+                    # Friendly piece encountered
+                    continue
+                elif squares[number_to_letter(m) + str(n)].team.colour != team.colour:
+                    # Opponent piece encountered
+                    threats.append(number_to_letter(m) + str(n))
+                    continue
+            else:
+                threats.append(number_to_letter(m) + str(n))
+    return threats
+
 def get_queen_threat(team, pos, squares):
     diag_threats = get_diagonal_threat(team, pos, squares)
     x_threats = get_x_threat(team, pos, squares)
@@ -6,7 +33,6 @@ def get_queen_threat(team, pos, squares):
     return diag_threats + x_threats + y_threats
 
 def get_diagonal_threat(team, pos, squares):
-    # check in each direction until piece or edge encountered
     dirs = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
     x = letter_to_number(pos[0])
     y = int(pos[1])
@@ -15,11 +41,9 @@ def get_diagonal_threat(team, pos, squares):
     for pair in dirs:
         m = x + pair[0]
         n = y + pair[1]
-        #print(pair)
         while True:
             """ Continuously add pair to position until piece or edge encountered
             """
-            #print('m: {}, n: {}'.format(m, n))
             if m < 0 or m > 7 or n < 1 or n > 8:
                 # Edge encountered
                 break
