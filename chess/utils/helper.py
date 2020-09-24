@@ -1,3 +1,10 @@
+def get_queen_threat(team, pos, squares):
+    diag_threats = get_diagonal_threat(team, pos, squares)
+    x_threats = get_x_threat(team, pos, squares)
+    y_threats = get_y_threat(team, pos, squares)
+
+    return diag_threats + x_threats + y_threats
+
 def get_diagonal_threat(team, pos, squares):
     # check in each direction until piece or edge encountered
     dirs = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
@@ -30,9 +37,6 @@ def get_diagonal_threat(team, pos, squares):
                 m = m + pair[0]
                 n = n + pair[1]
     return threats
-
-
-
 
 def get_L_threat(team, pos, squares):
     """ For knights
@@ -143,7 +147,6 @@ def get_x_threat(team, pos, squares):
     return x_threats
 
 def calculate_all_threat(teams, board):
-    print('recalculating all threat')
     for team in teams:
         for piece in team.pieces:
             piece.calculate_threat(board.squares)

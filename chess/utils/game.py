@@ -356,10 +356,10 @@ def run_game():
     cy_team, ye_team = board.initialize_squares(teams)
     
     teams = calculate_all_threat(teams, board)
-    for team in teams:
-        print('All {} threats: {}'.format(team.colour, team.threatening))
-        for piece in team.pieces:
-            print('{} threatening: {}'.format(piece, piece.threatening))
+    # for team in teams:
+    #     print('All {} threats: {}'.format(team.colour, team.threatening))
+    #     for piece in team.pieces:
+    #         print('{} threatening: {}'.format(piece, piece.threatening))
 
     while win is False:
         print()
@@ -368,6 +368,8 @@ def run_game():
         team = teams[i%2]
 
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(team)
+        i += act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, team)
+
         if move_result == 'take':
             # add taken piece to opposing team's graveyard
             if team.colour == 'cyan':
@@ -378,6 +380,4 @@ def run_game():
         elif move_result == 'move':
             # threat needs to be calculated every time a piece moves
             teams = calculate_all_threat(teams, board)
-            
-        i += act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, team)
         

@@ -1,6 +1,6 @@
 from utils.helper import (y_flip, letter_to_number, number_to_letter,
                          get_x_threat, get_y_threat, get_L_threat,
-                         get_diagonal_threat)
+                         get_diagonal_threat, get_queen_threat)
 
 class Piece:
 
@@ -73,4 +73,7 @@ class Piece:
         elif self.type == 'bishop':
             for threatened_square in get_diagonal_threat(self.team, self.pos, squares):
                 self.threatening.append(threatened_square)
+
+        elif self.type == 'queen':
+            print('{} {}: {}'.format(self.team.colour, self.type, get_queen_threat(self.team, self.pos, squares)))
         
