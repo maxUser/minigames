@@ -3,7 +3,7 @@ from utils.game import (player_move, y_flip, letter_to_number,
                  act_on_result, get_x_between, get_y_between, testing_environment)
 from utils.board import Board
 from utils.teams import Team
-from utils.helper import calculate_all_threat
+from utils.helper import update_team_threat
 import utils.game as game
 import pytest
 
@@ -151,12 +151,14 @@ def selectH8():
 
 
 class TestUtility:
+
     @pytest.mark.kingThreat
     def test_king_threat(self, monkeypatch):
+
         teams, board = testing_environment()
         cy_team = teams[0]
         ye_team = teams[1]
-
+        
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
@@ -185,56 +187,52 @@ class TestUtility:
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectE6)
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
 
-        teams = calculate_all_threat(teams, board)
+        teams = update_team_threat(teams, board)
+        cyKing_threats = []
+        yeKing_threats = []
         for team in teams:
             for piece in team.pieces:
                 if piece.type == 'king':
-                    print('{} threats: {}'.format(piece, piece.threatening))
+                    if piece.team.colour == 'cyan':
+                        cyKing_threats = piece.threatening
+                    elif piece.team.colour == 'yellow':
+                        yeKing_threats = piece.threatening
 
-        assert result == 0
+        assert yeKing_threats == ['e7', 'f6', 'f5', 'd5', 'd6'] and cyKing_threats == ['f4', 'f3', 'e2', 'd3', 'd4']
 
     @pytest.mark.bishopThreat
     def test_bishop_threat(self, monkeypatch):
         teams, board = testing_environment()
         cy_team = teams[0]
-        ye_team = teams[1]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD3)
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
         act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
 
-        monkeypatch.setattr(game, 'get_piece_to_move', selectG7)
-        monkeypatch.setattr(game, 'get_target_position', selectG5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
-
-        monkeypatch.setattr(game, 'get_piece_to_move', selectB2)
-        monkeypatch.setattr(game, 'get_target_position', selectD4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
-
         monkeypatch.setattr(game, 'get_piece_to_move', selectC1)
         monkeypatch.setattr(game, 'get_target_position', selectF4)
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
         
-        teams = calculate_all_threat(teams, board)
+        teams = update_team_threat(teams, board)
 
+        cyBishop_threats = []
         for piece in teams[0].pieces:
             if piece.threatening:
-                print('{}: {}'.format(piece, piece.threatening))
-            # if piece.type == 'bishop':
-            #     print('{}: {}'.format(piece, piece.threatening))
+                if piece.type == 'bishop':
+                    cyBishop_threats = piece.threatening
+                    print(piece.threatening)
 
-        assert result == 0
+        assert cyBishop_threats == ['g5', 'h6', 'g3', 'e5', 'd6', 'c7', 'e3', 'd2', 'c1']
 
 
-    @pytest.mark.rookThreaty
-    def test_rook_threat_y(self, monkeypatch):
-        board.reset_game()
+    @pytest.mark.rookThreat
+    def test_rook_threat(self, monkeypatch):
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
@@ -259,56 +257,17 @@ class TestUtility:
         monkeypatch.setattr(game, 'get_piece_to_move', selectA5)
         monkeypatch.setattr(game, 'get_target_position', selectE5)
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
-
-        assert result == 0
-
-    @pytest.mark.rookThreatx
-    def test_rook_threat_x(self, monkeypatch):
-        board.reset_game()
-
-        monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
-        monkeypatch.setattr(game, 'get_target_position', selectA4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
         act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
 
-        monkeypatch.setattr(game, 'get_piece_to_move', selectA1)
-        monkeypatch.setattr(game, 'get_target_position', selectA3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        teams = update_team_threat(teams, board)
 
-        monkeypatch.setattr(game, 'get_piece_to_move', selectF2)
-        monkeypatch.setattr(game, 'get_target_position', selectF3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        cyRook_threats = []
+        for piece in teams[0].pieces:
+            if piece.threatening:
+                if piece.type == 'rook':
+                    cyRook_threats = piece.threatening
 
-        monkeypatch.setattr(game, 'get_piece_to_move', selectA3)
-        monkeypatch.setattr(game, 'get_target_position', selectD3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
-
-        monkeypatch.setattr(game, 'get_piece_to_move', selectC2)
-        monkeypatch.setattr(game, 'get_target_position', selectC4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
-
-        monkeypatch.setattr(game, 'get_piece_to_move', selectC4)
-        monkeypatch.setattr(game, 'get_target_position', selectC5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
-
-        monkeypatch.setattr(game, 'get_piece_to_move', selectC5)
-        monkeypatch.setattr(game, 'get_target_position', selectC6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
-
-        monkeypatch.setattr(game, 'get_piece_to_move', selectD3)
-        monkeypatch.setattr(game, 'get_target_position', selectD6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
-
-        assert result == 0
-
+        assert cyRook_threats == ['f5', 'g5', 'h5', 'd5', 'c5', 'b5', 'a5', 'e6', 'e7', 'e4', 'e3']
 
     @pytest.mark.yBetween
     def test_get_between_straight(self):
@@ -323,7 +282,9 @@ class TestUtility:
 
     @pytest.mark.take
     def test_taking_pieces(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD4)
@@ -342,20 +303,14 @@ class TestUtility:
 
         assert result == 1
 
-
-
-
-
 class TestPieceMovement:
-    """
-        Notes: Call board.reset_game() at the start of every test
-    """
-
     """
     QUEEN TESTS
     """
+    @pytest.mark.queen
     def test_queen_lateral_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD4)
@@ -374,8 +329,10 @@ class TestPieceMovement:
 
         assert result == 1
 
+    @pytest.mark.queen
     def test_queen_diagonal_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD4)
@@ -394,8 +351,10 @@ class TestPieceMovement:
 
         assert result == 1
 
+    @pytest.mark.queen
     def test_queen_bad_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD4)
@@ -435,23 +394,28 @@ class TestPieceMovement:
     #    result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
 
     #    assert result == 1
-
+    @pytest.mark.king
     def test_yeKing_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        ye_team = teams[1]
+
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectE5)
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE8)
         monkeypatch.setattr(game, 'get_target_position', selectE7)
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
 
         assert result == 1
 
+    @pytest.mark.king
     def test_cyKing_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
+
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team)
@@ -464,9 +428,10 @@ class TestPieceMovement:
 
         assert result == 1
 
-
+    @pytest.mark.king
     def test_king_straight_move_fail(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
@@ -480,8 +445,10 @@ class TestPieceMovement:
 
         assert result == 0
 
+    @pytest.mark.king
     def test_king_lateral_move_fail(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
@@ -509,8 +476,10 @@ class TestPieceMovement:
     """
     BISHOP TESTS
     """
+    @pytest.mark.bishop
     def test_bishop_bad_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD3)
@@ -529,9 +498,10 @@ class TestPieceMovement:
 
         assert result == 0
 
-
+    @pytest.mark.bishop
     def test_bishop_lateral_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD3)
@@ -550,8 +520,10 @@ class TestPieceMovement:
 
         assert result == 0
 
+    @pytest.mark.bishop
     def test_bishop_straight_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC2)
         monkeypatch.setattr(game, 'get_target_position', selectC4)
@@ -568,8 +540,10 @@ class TestPieceMovement:
     """
     KNIGHT TESTS
     """
+    @pytest.mark.knight
     def test_yeKnight_move_far_fail(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        ye_team = teams[1]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG8)
         monkeypatch.setattr(game, 'get_target_position', selectF3)
@@ -578,8 +552,10 @@ class TestPieceMovement:
 
         assert result == 0
 
+    @pytest.mark.knight
     def test_yeKnight_move_straight_fail(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        ye_team = teams[1]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG8)
         monkeypatch.setattr(game, 'get_target_position', selectF6)
@@ -593,8 +569,10 @@ class TestPieceMovement:
 
         assert result == 0
 
+    @pytest.mark.knight
     def test_yeKnight_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        ye_team = teams[1]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG8)
         monkeypatch.setattr(game, 'get_target_position', selectF6)
@@ -603,8 +581,10 @@ class TestPieceMovement:
 
         assert result == 1
 
+    @pytest.mark.knight
     def test_cyKnight_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB1)
         monkeypatch.setattr(game, 'get_target_position', selectC3)
@@ -616,8 +596,10 @@ class TestPieceMovement:
     """
     ROOK TESTS
     """
+    @pytest.mark.rook
     def test_rook_diagonal_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
@@ -636,8 +618,11 @@ class TestPieceMovement:
 
         assert result == 0
 
+    @pytest.mark.rook
     def test_rook_lateral_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectH2)
         monkeypatch.setattr(game, 'get_target_position', selectH4)
@@ -674,9 +659,10 @@ class TestPieceMovement:
     """
     PAWN TESTS
     """
-
+    @pytest.mark.pawn
     def test_pawn_diagonal_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA3)
@@ -690,8 +676,10 @@ class TestPieceMovement:
 
         assert result == 0
 
+    @pytest.mark.pawn
     def test_pawn_init_move(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA3)
@@ -710,9 +698,11 @@ class TestPieceMovement:
 
         assert result == 0
 
-
+    @pytest.mark.pawn
     def test_cyPawn_take_yePawn(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
@@ -731,8 +721,11 @@ class TestPieceMovement:
 
         assert result == 1
 
+    @pytest.mark.pawn
     def test_yePawn_take_cyPawn(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA3)
@@ -756,8 +749,11 @@ class TestPieceMovement:
 
         assert result == 1
 
+    @pytest.mark.pawn
     def test_pawn_headOn_collision(self, monkeypatch):
-        board.reset_game()
+        teams, _ = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA4)

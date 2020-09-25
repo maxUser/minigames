@@ -5,7 +5,7 @@ from termcolor import colored
 from utils.helper import (y_flip, get_x_between, get_y_between,
                           letter_to_number, number_to_letter,
                           print_error, get_piece_to_move,
-                          get_target_position, calculate_all_threat)
+                          get_target_position, update_team_threat)
 
 
 
@@ -339,11 +339,11 @@ def testing_environment():
     cy_team = Team('cyan')
     ye_team = Team('yellow')
     teams = (cy_team, ye_team)
+    board.reset_game()
     cy_team, ye_team = board.initialize_squares(teams)
-    teams = calculate_all_threat(teams, board)
+    teams = update_team_threat(teams, board)
 
     return teams, board
-
 
 def run_game():
     
@@ -355,7 +355,7 @@ def run_game():
 
     cy_team, ye_team = board.initialize_squares(teams)
     
-    teams = calculate_all_threat(teams, board)
+    teams = update_team_threat(teams, board)
     # for team in teams:
     #     print('All {} threats: {}'.format(team.colour, team.threatening))
     #     for piece in team.pieces:
@@ -376,8 +376,8 @@ def run_game():
                 ye_team.graveyard.append(board.squares[tar_pos])
             elif team.colour == 'yellow':
                 cy_team.graveyard.append(board.squares[tar_pos])
-            teams = calculate_all_threat(teams, board)
+            teams = update_team_threat(teams, board)
         elif move_result == 'move':
             # threat needs to be calculated every time a piece moves
-            teams = calculate_all_threat(teams, board)
+            teams = update_team_threat(teams, board)
         

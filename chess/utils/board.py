@@ -55,7 +55,6 @@ class Board:
                     ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
                     ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
                 ]
-        #self.initialize_squares()
 
     def initialize_squares(self, teams):
         """

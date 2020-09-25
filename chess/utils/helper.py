@@ -170,7 +170,7 @@ def get_x_threat(team, pos, squares):
 
     return x_threats
 
-def calculate_all_threat(teams, board):
+def update_team_threat(teams, board):
     for team in teams:
         for piece in team.pieces:
             piece.calculate_threat(board.squares)
