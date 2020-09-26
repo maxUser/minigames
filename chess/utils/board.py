@@ -133,19 +133,19 @@ class Board:
     def print_square(self, pos):
         return self.board[pos[1]][pos[0]]
 
-    def move_piece(self, curr_pos, tar_pos, team):
+    def move_piece(self, curr_pos, tar_pos):
         """ Change the internal representation of the board
         """
         self.squares[curr_pos].pos = tar_pos
         self.squares[tar_pos] = self.squares[curr_pos]
         self.squares[curr_pos] = ''   
 
-    def alter(self, curr_pos, tar_pos):
+    def alter(self, curr_x_y, tar_x_y):
         """ Change the print out of the board
         """
-        piece = self.board[curr_pos[1]][curr_pos[0]]
-        self.board[curr_pos[1]][curr_pos[0]] = ' '
-        self.board[tar_pos[1]][tar_pos[0]] = piece
+        piece = self.board[curr_x_y[1]][curr_x_y[0]]
+        self.board[curr_x_y[1]][curr_x_y[0]] = ' '
+        self.board[tar_x_y[1]][tar_x_y[0]] = piece
 
     def print_board(self):
         x_axis = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']

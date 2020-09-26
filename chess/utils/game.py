@@ -40,13 +40,12 @@ def king_rules(curr_pos, tar_pos):
     # 4. The king is not currently in check.
     # 5. The king does not pass through a square that is attacked by an enemy piece.
     # 6. The king does not end up in check. (True of any legal move.)
-    if (tar_x_y[0] == curr_x_y[0] + 2 and
-        king.initial_pos is True and kingside_rook.initial_pos is True and
-        board.squares[curr]):
+    if ((king.initial_pos is True and kingside_rook.initial_pos is True) and
+        not board.squares[tar_pos] and 
+        tar_x_y[0] == curr_x_y[0] + 2):
         # kingside
-        print('{}, {}'.format(curr_pos, tar_pos))
-
         return 'kingside_castle'
+        
 
     elif tar_x_y[0] == curr_x_y[0] - 2:
         # queenside
@@ -166,7 +165,7 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
             return 'ff'
 
     # check if piece move through another piece (unless knight)
-    # TODO: there must be simpler way to do this
+    # TODO: there must be simpler way to do this - at least put it in helper.py
     if board.squares[curr_pos].type != 'knight':
         exes = []
         whys = []
@@ -258,8 +257,10 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
 
     if result == 'illegal':
         return result
+    elif result == 'kingside_castle':
+        return result
     else:
-        if board.squares[tar_pos] == '':
+        if not board.squares[tar_pos]:
             return 'move'
         else:
             return 'take'
@@ -279,14 +280,13 @@ def player_move(team):
     return result, curr_pos, tar_pos, curr_x_y, tar_x_y
 
 def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
-    """
+    """ 
         Takes result of player_move and check_move functions
         to determine next action
 
         Return: 0 if move is invalid (same player's turn)
                 1 if move is valid (next player's turn)
     """
-    # print('result is {}'.format(result))
     if result == 'ff':
         print_error('Target square occupied by friendly piece')
         return 0
@@ -303,6 +303,18 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         print_error('Invalid input')
         return 0
 
+    elif result == 'kingside_castle':
+        print('Kingside Castle')
+        board.squares[curr_pos].initial_pos = False
+        board.squares[number_to_letter(curr_x_y[0]+3) + curr_pos[1]].initial_pos = False
+        # move king
+        board.alter(curr_x_y, tar_x_y)
+        board.move_piece(curr_pos, tar_pos)
+        # move rook
+        board.alter([curr_x_y[0]+3, curr_x_y[1]], [curr_x_y[0]+1, curr_x_y[1]])
+        board.move_piece(number_to_letter(curr_x_y[0]+3) + curr_pos[1], number_to_letter(curr_x_y[0]+1) + curr_pos[1])
+        return 1
+
     elif result == 'take':
         print('Taking piece at: ' + tar_pos)
         if board.squares[curr_pos].initial_pos == True:
@@ -313,7 +325,7 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         # remove position from taken piece
         board.squares[tar_pos].pos = 'graveyard'
         # update internal representation of board
-        board.move_piece(curr_pos, tar_pos, team)
+        board.move_piece(curr_pos, tar_pos)
 
         print('{} threatening {}'.format(board.squares[tar_pos], board.squares[tar_pos].threatening))
 
@@ -321,17 +333,14 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         return 1
 
     elif result == 'move':
-        print('Moving {} to {}'.format(curr_pos, tar_pos))
+        print('Moving {} to {}'.format(board.squares[curr_pos], tar_pos))
         if board.squares[curr_pos].initial_pos == True:
             board.squares[curr_pos].initial_pos = False
         
         # update print out of board
         board.alter(curr_x_y, tar_x_y)
         # update internal representation of board
-        board.move_piece(curr_pos, tar_pos, team)   
-
-        #print('{} threatening {}'.format(board.squares[tar_pos], board.squares[tar_pos].threatening))
-        #print('All {} threats: {}'.format(team.colour, team.threatening))
+        board.move_piece(curr_pos, tar_pos)   
 
         return 1
 
@@ -356,10 +365,6 @@ def run_game():
     cy_team, ye_team = board.initialize_squares(teams)
     
     teams = update_team_threat(teams, board)
-    # for team in teams:
-    #     print('All {} threats: {}'.format(team.colour, team.threatening))
-    #     for piece in team.pieces:
-    #         print('{} threatening: {}'.format(piece, piece.threatening))
 
     while win is False:
         print()
