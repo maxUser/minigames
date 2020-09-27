@@ -171,6 +171,8 @@ def get_x_threat(team, pos, squares):
     return x_threats
 
 def update_team_threat(teams, board):
+    """ this function needs to be called every time a piece is moved
+    """
     for team in teams:
         for piece in team.pieces:
             piece.calculate_threat(board.squares)

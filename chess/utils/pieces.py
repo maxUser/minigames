@@ -11,7 +11,7 @@ class Piece:
     def __init__(self, type, team, pos):
         """
             type (str): ex. pawn, rook, knight, bishop, king, or queen
-            team (str): ex. cyan, yellow
+            team (teams obj): instance of Team class
             pos (str): ex. b2
             initial_pos (bool): if the piece has moved or not
             threatened (bool): if the piece is in danger of being taken
@@ -20,13 +20,14 @@ class Piece:
         self.type = type
         self.team = team
         self.pos = pos
-        self.threatening = []
+        self.threatening = [] 
         self.initial_pos = True
-        self.threatened = False
+        self.threatened = False # currently unused
 
     def calculate_threat(self, squares):
-        """ this function needs to be called every time a piece is moved
-        """
+        if self.pos == 'graveyard':
+            self.threatening = []
+            return
         #old_threatening = []
         if self.threatening:
             #old_threatening = self.threatening

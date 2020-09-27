@@ -24,7 +24,7 @@ def queen_rules(curr_pos, tar_pos):
 
     return None
 
-def king_rules(curr_pos, tar_pos):
+def king_rules(team, oppo_team, curr_pos, tar_pos):
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
 
@@ -40,19 +40,46 @@ def king_rules(curr_pos, tar_pos):
     # 4. The king is not currently in check.
     # 5. The king does not pass through a square that is attacked by an enemy piece.
     # 6. The king does not end up in check. (True of any legal move.)
-    if ((king.initial_pos is True and kingside_rook.initial_pos is True) and
-        not board.squares[tar_pos] and 
-        tar_x_y[0] == curr_x_y[0] + 2):
-        # kingside
-        return 'kingside_castle'
+    if (tar_x_y[0] == curr_x_y[0] + 2 # 1. Kingside castle
+        and (king.initial_pos is True and kingside_rook.initial_pos is True) # 2. Neither the king nor the chosen rook has previously moved.
+        and (not board.squares[tar_pos] and not board.squares[number_to_letter(curr_x_y[0]+1) + curr_pos[1]]) # 3. There are no pieces between the king and the chosen rook. 
+        and curr_pos not in oppo_team.threatening # 4. The king is not currently in check.
+        and str(number_to_letter(curr_x_y[0]+1) + curr_pos[1]) not in oppo_team.threatening # 5. The king does not pass through a square that is attacked by an enemy piece.
+        and str(number_to_letter(curr_x_y[0]+2) + curr_pos[1]) not in oppo_team.threatening): # 6. The king does not end up in check. (True of any legal move.)
         
+        return 'kingside_castle'  
 
-    elif tar_x_y[0] == curr_x_y[0] - 2:
-        # queenside
-        pass
+    elif (tar_x_y[0] == curr_x_y[0] - 2
+        and king.initial_pos is True and queenside_rook.initial_pos is True
+        and not board.squares[tar_pos] and not board.squares[number_to_letter(curr_x_y[0]-1) + curr_pos[1]]
+        and curr_pos not in oppo_team.threatening
+        and str(number_to_letter(curr_x_y[0]-1) + curr_pos[1]) not in oppo_team.threatening
+        and str(number_to_letter(curr_x_y[0]-2) + curr_pos[1]) not in oppo_team.threatening):
+        
+        return 'queenside_castle'
 
-    if abs(curr_x_y[0] - tar_x_y[0]) > 1 or abs(curr_x_y[1] - tar_x_y[1]) > 1:
+    elif abs(curr_x_y[0] - tar_x_y[0]) > 1 or abs(curr_x_y[1] - tar_x_y[1]) > 1:
+        # moving king more than 1 square
         return 'illegal'
+
+    elif (tar_x_y[0] == curr_x_y[0] + 2 
+        and (king.initial_pos is False or kingside_rook.initial_pos is False
+        or board.squares[number_to_letter(curr_x_y[0]+1) + curr_pos[1]]
+        or curr_pos in oppo_team.threatening
+        or str(number_to_letter(curr_x_y[0]+1) + curr_pos[1]) in oppo_team.threatening
+        or str(number_to_letter(curr_x_y[0]+2) + curr_pos[1]) in oppo_team.threatening)):
+        # Kingside castle fail
+        return 'illegal'
+
+    elif (tar_x_y[0] == curr_x_y[0] - 2 
+        and (king.initial_pos is False or queenside_rook.initial_pos is False
+        or board.squares[number_to_letter(curr_x_y[0]-1) + curr_pos[1]]
+        or curr_pos in oppo_team.threatening
+        or str(number_to_letter(curr_x_y[0]-1) + curr_pos[1]) in oppo_team.threatening
+        or str(number_to_letter(curr_x_y[0]-2) + curr_pos[1]) in oppo_team.threatening)):
+        # queenside castle fail
+        return 'illegal'
+    
 
     return None
 
@@ -143,7 +170,7 @@ def pawn_rules(colour, curr_pos, tar_pos):
 
     return None
 
-def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
+def check_move(team, oppo_team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     """
     The logic: check if move is illegal, if not determine
                whether it is a take or move action.
@@ -240,7 +267,6 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
                         if board.squares[pos] != '':
                             return 'illegal'
 
-
     # check if move is legal according to piece move restrictions
     if board.squares[curr_pos].type == 'pawn':
         result = pawn_rules(colour, curr_pos, tar_pos)
@@ -251,13 +277,11 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
     elif board.squares[curr_pos].type == 'bishop':
         result = bishop_rules(curr_pos, tar_pos)
     elif board.squares[curr_pos].type == 'king':
-        result = king_rules(curr_pos, tar_pos)
+        result = king_rules(team, oppo_team, curr_pos, tar_pos)
     elif board.squares[curr_pos].type == 'queen':
         result = queen_rules(curr_pos, tar_pos)
 
-    if result == 'illegal':
-        return result
-    elif result == 'kingside_castle':
+    if result in ('kingside_castle', 'queenside_castle', 'illegal') :
         return result
     else:
         if not board.squares[tar_pos]:
@@ -265,7 +289,7 @@ def check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y):
         else:
             return 'take'
 
-def player_move(team):
+def player_move(team, oppo_team):
     print(colored(team.colour + '\'s turn', team.colour))
 
     curr_pos = get_piece_to_move()
@@ -275,7 +299,7 @@ def player_move(team):
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
 
-    result = check_move(team, curr_pos, tar_pos, curr_x_y, tar_x_y)
+    result = check_move(team, oppo_team, curr_pos, tar_pos, curr_x_y, tar_x_y)
 
     return result, curr_pos, tar_pos, curr_x_y, tar_x_y
 
@@ -287,6 +311,7 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         Return: 0 if move is invalid (same player's turn)
                 1 if move is valid (next player's turn)
     """
+    #print('Result: {}'.format(result))
     if result == 'ff':
         print_error('Target square occupied by friendly piece')
         return 0
@@ -304,7 +329,6 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         return 0
 
     elif result == 'kingside_castle':
-        print('Kingside Castle')
         board.squares[curr_pos].initial_pos = False
         board.squares[number_to_letter(curr_x_y[0]+3) + curr_pos[1]].initial_pos = False
         # move king
@@ -313,6 +337,17 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         # move rook
         board.alter([curr_x_y[0]+3, curr_x_y[1]], [curr_x_y[0]+1, curr_x_y[1]])
         board.move_piece(number_to_letter(curr_x_y[0]+3) + curr_pos[1], number_to_letter(curr_x_y[0]+1) + curr_pos[1])
+        return 1
+    
+    elif result == 'queenside_castle':
+        board.squares[curr_pos].initial_pos = False
+        board.squares[number_to_letter(curr_x_y[0]-4) + curr_pos[1]].initial_pos = False
+        # move king
+        board.alter(curr_x_y, tar_x_y)
+        board.move_piece(curr_pos, tar_pos)
+        # move rook
+        board.alter([curr_x_y[0]-4, curr_x_y[1]], [curr_x_y[0]-1, curr_x_y[1]])
+        board.move_piece(number_to_letter(curr_x_y[0]-4) + curr_pos[1], number_to_letter(curr_x_y[0]-1) + curr_pos[1])
         return 1
 
     elif result == 'take':
@@ -328,7 +363,6 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         board.move_piece(curr_pos, tar_pos)
 
         print('{} threatening {}'.format(board.squares[tar_pos], board.squares[tar_pos].threatening))
-
 
         return 1
 
@@ -371,18 +405,20 @@ def run_game():
         board.print_board()
         print()
         team = teams[i%2]
+        oppo_team = teams[(i+1)%2]
 
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(team)
-        i += act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, team)
+        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(team, oppo_team)
         
         if move_result == 'take':
             # add taken piece to opposing team's graveyard
-            if team.colour == 'cyan':
-                ye_team.graveyard.append(board.squares[tar_pos])
-            elif team.colour == 'yellow':
-                cy_team.graveyard.append(board.squares[tar_pos])
+            oppo_team.graveyard.append(board.squares[tar_pos])
+            # update threat
+            teams = update_team_threat(teams, board)       
+        elif move_result in ('move', 'kingside_castle', 'queenside_castle'):
+            # update threat
             teams = update_team_threat(teams, board)
-        elif move_result == 'move':
-            # threat needs to be calculated every time a piece moves
-            teams = update_team_threat(teams, board)
+
+        i += act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, team)
+        
+        
         
