@@ -5,10 +5,8 @@ from termcolor import colored
 from utils.helper import (y_flip, get_x_between, get_y_between,
                           letter_to_number, number_to_letter,
                           print_error, get_piece_to_move,
-                          get_target_position, update_team_threat)
-
-
-
+                          get_target_position, update_team_threat,
+                          checkmate)
 
 board = Board()
 
@@ -28,10 +26,10 @@ def king_rules(team, oppo_team, curr_pos, tar_pos):
     curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
     tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
 
-
-    kingside_rook = board.squares[number_to_letter(curr_x_y[0]+3) + str(curr_pos[1])]
-    queenside_rook = board.squares[number_to_letter(curr_x_y[0]-4) + str(curr_pos[1])]
     king = board.squares[curr_pos]
+    if king.initial_pos is True:
+        kingside_rook = board.squares[number_to_letter(curr_x_y[0]+3) + str(curr_pos[1])]
+        queenside_rook = board.squares[number_to_letter(curr_x_y[0]-4) + str(curr_pos[1])]
 
     # Castling
     # 1. The castling must be kingside or queenside.
@@ -317,7 +315,7 @@ def act_on_result(result, curr_pos, tar_pos, curr_x_y, tar_x_y, team):
         return 0
 
     elif result == 'illegal':
-        print_error('Illegal move')
+        print_error('Illegal move: ' + curr_pos + ' to ' + tar_pos)
         return 0
 
     elif result == 'selection_error':
@@ -400,7 +398,7 @@ def run_game():
     
     teams = update_team_threat(teams, board)
 
-    while win is False:
+    while win is not True:
         print()
         board.print_board()
         print()
@@ -409,16 +407,17 @@ def run_game():
 
         move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(team, oppo_team)
         
+        if move_result in ('take', 'move', 'kingside_castle', 'queenside_castle'):
+            teams = update_team_threat(teams, board)
+            win = checkmate(team, oppo_team, board.squares)         
+
         if move_result == 'take':
             # add taken piece to opposing team's graveyard
-            oppo_team.graveyard.append(board.squares[tar_pos])
-            # update threat
-            teams = update_team_threat(teams, board)       
-        elif move_result in ('move', 'kingside_castle', 'queenside_castle'):
-            # update threat
-            teams = update_team_threat(teams, board)
+            oppo_team.graveyard.append(board.squares[tar_pos])   
+        
 
         i += act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, team)
-        
+
+    print('game over') 
         
         

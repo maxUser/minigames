@@ -1,4 +1,36 @@
+def checkmate(team, oppo_team, squares):
+    """ Determine whether oppo_team has been checkmated.
+        A game position in which a player's king is in check 
+        (threatened with capture) and there is no way to avoid the threat.
+
+        Args
+            team = the team that just played a move
+            oppo_team = the other team (being checked)
+            squares = dictionary of squares on the board and what they contain
+    """
+    oppo_team_king_pos = [piece.pos for piece in oppo_team.pieces if piece.type == 'king'][0]
+    # Determine which piece is threatening the king
+    threatening_piece = [piece for piece in team.pieces if oppo_team_king_pos in piece.threatening][0]
+    # First, resolve check  
+    if oppo_team_king_pos in team.threatening:
+        print('{} is in check!'.format([piece for piece in team.pieces if piece.type == 'king'][0]))
+        return 'check'
+    else:
+        return False
+    # Second, resolve possible escape from check
+    # 1) can the king move to a non-threatened square
+    # 2) can a piece move into the path of the threat (non-knight, non-pawn threat)
+    if threatening_piece.type not in ('knight', 'pawn'):
+        # nothing can move into the path of the threat posed by knights or pawns
+        pass
+
+    print(get_king_threat(oppo_team, oppo_team_king_pos, squares))
+
+    return False
+
 def get_king_threat(team, pos, squares):
+    """ Return list of all squares threatened by the king
+    """
     x = letter_to_number(pos[0])
     y = int(pos[1])
     threats = []
@@ -10,22 +42,14 @@ def get_king_threat(team, pos, squares):
         n = y + pair[1]
         
         if m < 0 or m > 7 or n < 1 or n > 8:
-            continue
+            break
         else:
-            if squares[number_to_letter(m) + str(n)]:
-                # If square contains piece
-                if squares[number_to_letter(m) + str(n)].team.colour == team.colour:
-                    # Friendly piece encountered
-                    continue
-                elif squares[number_to_letter(m) + str(n)].team.colour != team.colour:
-                    # Opponent piece encountered
-                    threats.append(number_to_letter(m) + str(n))
-                    continue
-            else:
-                threats.append(number_to_letter(m) + str(n))
+            threats.append(number_to_letter(m) + str(n))
     return threats
 
 def get_queen_threat(team, pos, squares):
+    """ Return list of all squares threatened by the queen
+    """
     diag_threats = get_diagonal_threat(team, pos, squares)
     x_threats = get_x_threat(team, pos, squares)
     y_threats = get_y_threat(team, pos, squares)
@@ -51,6 +75,7 @@ def get_diagonal_threat(team, pos, squares):
                 if squares[number_to_letter(m) + str(n)]:
                     if squares[number_to_letter(m) + str(n)].team.colour == team.colour:
                         # Friendly piece encountered
+                        threats.append(number_to_letter(m) + str(n))
                         break
                     elif squares[number_to_letter(m) + str(n)].team.colour != team.colour:
                         # Opponent piece encountered
@@ -106,6 +131,7 @@ def get_y_threat(team, pos, squares):
             """ If first encountered taken square contains ally,
                 do not add to threat and break
             """
+            y_threats.append(position)
             break
         y_threats.append(position)
     
@@ -124,10 +150,9 @@ def get_y_threat(team, pos, squares):
             """ If first encountered taken square contains ally,
                 do not add to threat and break
             """
+            y_threats.append(position)
             break
         y_threats.append(position)
-
-    #print('{}: {}'.format(pos, y_threats))
 
     return y_threats 
 
@@ -150,6 +175,7 @@ def get_x_threat(team, pos, squares):
             """ If first encountered taken square contains ally,
                 do not add to threat and break
             """
+            x_threats.append(position)
             break
         x_threats.append(position)
     for i in range(letter_to_number(pos[0])-1, -1, -1):
@@ -165,6 +191,7 @@ def get_x_threat(team, pos, squares):
             """ If first encountered taken square contains ally,
                 do not add to threat and break
             """
+            x_threats.append(position)
             break
         x_threats.append(position)
 
