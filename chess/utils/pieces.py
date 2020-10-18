@@ -81,7 +81,7 @@ class Piece:
                 self.threatening.append(threatened_square)
 
         elif self.type == 'king':
-            for threatened_square in get_king_threat(self.team, self.pos, squares):
+            for threatened_square in get_king_threat(self.pos):
                 self.threatening.append(threatened_square)
             #print('{} {} threats: {}'.format(self.team.colour, self.type, get_king_threat(self.team, self.pos, squares)))
         

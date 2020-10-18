@@ -1,4 +1,7 @@
-def checkmate(team, oppo_team, squares):
+from utils.piece_rules import (queen_rules, king_rules, bishop_rules,
+                        knight_rules, rook_rules, pawn_rules)
+
+def checkmate(team, oppo_team, squares, board):
     """ Determine whether oppo_team has been checkmated.
         A game position in which a player's king is in check 
         (threatened with capture) and there is no way to avoid the threat.
@@ -9,31 +12,181 @@ def checkmate(team, oppo_team, squares):
             squares = dictionary of squares on the board and what they contain
     """
     oppo_team_king_pos = [piece.pos for piece in oppo_team.pieces if piece.type == 'king'][0]
-    # Determine which piece is threatening the king
-    threatening_piece = [piece for piece in team.pieces if oppo_team_king_pos in piece.threatening][0]
+    try:
+        # Determine which piece is threatening the king
+        threatening_piece = [piece for piece in team.pieces if oppo_team_king_pos in piece.threatening][0]
+    except IndexError as err:
+        return err
+
+    threatening_piece_pos = threatening_piece.pos
+
     # First, resolve check  
     if oppo_team_king_pos in team.threatening:
-        print('{} is in check!'.format([piece for piece in team.pieces if piece.type == 'king'][0]))
-        return 'check'
+        print('{} is in check!'.format([piece for piece in oppo_team.pieces if piece.type == 'king'][0]))
     else:
         return False
+
     # Second, resolve possible escape from check
     # 1) can the king move to a non-threatened square
     # 2) can a piece move into the path of the threat (non-knight, non-pawn threat)
-    if threatening_piece.type not in ('knight', 'pawn'):
-        # nothing can move into the path of the threat posed by knights or pawns
-        pass
+    # 3) can a piece take the threatening piece
+    if threatening_piece.type in ('knight', 'pawn'):
+        # nothing can move into the path of the threat posed by knights or pawns        
+        if get_king_safe_moves(oppo_team_king_pos, team, squares) or is_threatened(threatening_piece_pos, oppo_team):
+            # if the king has a place to move out of check, or
+            # if piece checking king can be taken
+            return 'check'
+        else:
+            return 'checkmate'
+    else:
+        # same as above + need to check if a piece from the king-in-check's team
+        # can move into the path of the threatening piece.
+        
+        # 1) Get path between threatening piece and king
+        squares_between = get_between_exclusive(threatening_piece_pos, oppo_team_king_pos)
+        # 2) Determine whether a piece can move into one of the squares between the threat and the king
+        # FUCK
+        
 
-    print(get_king_threat(oppo_team, oppo_team_king_pos, squares))
 
+    
+    return 'checkmate'
+
+def check_move(team, oppo_team, curr_pos, tar_pos, board):
+    """
+    The logic: check if move is illegal, if not determine
+               whether it is a take or move action.
+    """
+    colour = team.colour
+    result = 'no_result'
+    curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
+    tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
+
+    # check if input matches a valid board square
+    if curr_pos not in board.squares or tar_pos not in board.squares:
+        return 'invalid_input'
+
+    # player selected empty square or player trying to move wrong team
+    if board.squares[curr_pos] == '' or colour != board.squares[curr_pos].team.colour:
+        return 'selection_error'
+
+    # friendly fire is off
+    if board.squares[curr_pos] != '' and board.squares[tar_pos] != '':
+        if board.squares[tar_pos].team == board.squares[curr_pos].team:
+            return 'ff'
+
+    # check if piece move through another piece (unless knight)
+    # TODO: there must be simpler way to do this - at least put it in helper.py
+    if board.squares[curr_pos].type != 'knight':
+        exes = []
+        whys = []
+
+        # get all in between squares
+        if abs((tar_x_y[0]-curr_x_y[0])) == abs((tar_x_y[1]-curr_x_y[1])):
+            # diagonal move
+            if curr_x_y[0] > tar_x_y[0]:
+                # left diagonal
+                for x in range(tar_x_y[0]+1, curr_x_y[0]):
+                    exes.append(x)
+            else:
+                # right diagonal
+                for x in range(curr_x_y[0]+1, tar_x_y[0]):
+                    exes.append(x)
+
+            if curr_x_y[1] > tar_x_y[1]:
+                # upward diagonal
+                for y in range(tar_x_y[1]+1, curr_x_y[1]):
+                    whys.append(y)
+            else:
+                # downward diagonal
+                for y in range(curr_x_y[1]+1, tar_x_y[1]):
+                    whys.append(y)
+        else:
+            # straight move
+            if curr_pos[0] == tar_pos[0] and colour == 'cyan':
+                # same x
+                for i in range(int(curr_pos[1])+1, int(tar_pos[1])):
+                    pos = curr_pos[0] + str(i)
+                    if board.squares[pos] != '':
+                        result = 'illegal'
+            elif curr_pos[0] == tar_pos[0] and colour == 'yellow':
+                # same x
+                for i in range(int(tar_pos[1])+1, int(curr_pos[1])):
+                    pos = curr_pos[0] + str(i)
+                    if board.squares[pos] != '':
+                        return 'illegal'
+            # lateral move
+            start = letter_to_number(curr_pos[0])
+            end = letter_to_number(tar_pos[0])
+            if curr_pos[1] == tar_pos[1] and colour == 'cyan':
+                # same y
+                if start < end:
+                    # left to right
+                    for i in range(start+1, end):
+                        pos = str(number_to_letter(i)+curr_pos[1])
+                        # print(pos)
+                        if board.squares[pos] != '':
+                            return 'illegal'
+                else:
+                    # right to left
+                    for i in range(end, start-1):
+                        pos = str(number_to_letter(i)+curr_pos[1])
+                        # print(pos)
+                        if board.squares[pos] != '':
+                            return 'illegal'
+            elif curr_pos[1] == tar_pos[1] and colour == 'yellow':
+                # same y
+                if start < end:
+                    # left to right
+                    for i in range(start+1, end):
+                        pos = str(number_to_letter(i)+curr_pos[1])
+                        # print(pos)
+                        if board.squares[pos] != '':
+                            return 'illegal'
+                else:
+                    # right to left
+                    for i in range(end, start-1):
+                        pos = str(number_to_letter(i)+curr_pos[1])
+                        # print(pos)
+                        if board.squares[pos] != '':
+                            return 'illegal'
+
+    # check if move is legal according to piece move restrictions
+    if board.squares[curr_pos].type == 'pawn':
+        result = pawn_rules(colour, curr_pos, tar_pos, board)
+    elif board.squares[curr_pos].type == 'rook':
+        result = rook_rules(curr_pos, tar_pos)
+    elif board.squares[curr_pos].type == 'knight':
+        result = knight_rules(curr_pos, tar_pos)
+    elif board.squares[curr_pos].type == 'bishop':
+        result = bishop_rules(curr_pos, tar_pos)
+    elif board.squares[curr_pos].type == 'king':
+        result = king_rules(team, oppo_team, curr_pos, tar_pos, board)
+    elif board.squares[curr_pos].type == 'queen':
+        result = queen_rules(curr_pos, tar_pos)
+
+    if result in ('kingside_castle', 'queenside_castle', 'illegal') :
+        return result
+    else:
+        if not board.squares[tar_pos]:
+            return 'move'
+        else:
+            return 'take'
+
+def is_threatened(pos, oppo_team):
+    """ Return True if given piece is threatened by any piece in oppo_team
+    """
+    if pos in oppo_team.threatening:
+        return True
     return False
 
-def get_king_threat(team, pos, squares):
+def get_king_threat(pos):
     """ Return list of all squares threatened by the king
     """
     x = letter_to_number(pos[0])
     y = int(pos[1])
     threats = []
+    
 
     dirs = [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]
 
@@ -42,10 +195,23 @@ def get_king_threat(team, pos, squares):
         n = y + pair[1]
         
         if m < 0 or m > 7 or n < 1 or n > 8:
-            break
+            continue
         else:
             threats.append(number_to_letter(m) + str(n))
     return threats
+
+def get_king_safe_moves(oppo_king_pos, team, squares):
+    """ Returns list of squares the king can move to without being in check
+    """
+    safe_moves = []
+    possible_moves = get_king_threat(oppo_king_pos)
+    # print('possible moves: {}'.format(possible_moves))
+    for square in possible_moves:
+        if squares[square] == '':
+            if square not in team.threatening:
+                safe_moves.append(square)
+
+    return safe_moves
 
 def get_queen_threat(team, pos, squares):
     """ Return list of all squares threatened by the queen
@@ -206,6 +372,63 @@ def update_team_threat(teams, board):
             for threat in piece.threatening:
                 team.threatening.append(threat)
     return teams
+
+def get_between_exclusive(start, end):
+    """ Return all squares between start and end exclusive
+        y values = what the player sees (what's on side of board)
+
+        Args
+            start (str): a board position, eg. '12'
+            end (str): a board position, eg. '42'
+    """
+    start = str(letter_to_number(start[0])) + start[1]
+    end = str(letter_to_number(end[0])) + end[1]
+    startX = int(start[0])
+    startY = int(start[1])
+    endX = int(end[0])
+    endY = int(end[1])
+    x_diff = []
+    y_diff = []
+    if startX != endX and startY != endY:
+        # diagonal
+        if startX < endX:
+            # Left to right
+            for i in range(startX+1, endX):
+                x_diff.append(i)
+        elif startX > endX:
+            # Right to left
+            for i in range(startX-1, endX, -1):
+                x_diff.append(i)
+        if startY < endY:
+            # Down to up
+            for i in range(startY+1, endY):
+                y_diff.append(i)
+        elif startY > endY:
+            # Up to down
+            for i in range(startY-1, endY, -1):
+                y_diff.append(i)
+    elif startX == endX and startY != endY:
+        # x threat
+        if startY < endY:
+            for i in range(startY+1, endY):
+                y_diff.append(i)
+        elif startY > endY:
+            for i in range(startY-1, endY, -1):
+                y_diff.append(i)
+        for i in range(len(y_diff)):
+            x_diff.append(startX)
+    elif startY == endY and startX != endX:
+        # y threat
+        if startX < endX:
+            for i in range(startX+1, endX):
+                x_diff.append(i)
+        elif startX > endX:
+            for i in range(startX-1, endX, -1):
+                x_diff.append(i)
+        for i in range(len(x_diff)):
+            y_diff.append(startY)
+
+    return [number_to_letter(i)+str(j) for i, j in zip(x_diff, y_diff)]
 
 def get_x_between(exes):
     """

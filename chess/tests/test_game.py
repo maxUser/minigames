@@ -2,7 +2,7 @@ from utils.game import (player_move, y_flip, letter_to_number,
                  check_move, get_piece_to_move, get_target_position,
                  act_on_result, get_x_between, get_y_between, 
                  testing_environment)
-from utils.helper import update_team_threat, checkmate
+from utils.helper import update_team_threat, checkmate, get_between_exclusive
 from collections import Counter
 import utils.game as game
 import pytest
@@ -146,6 +146,145 @@ def selectH8():
 
 
 class TestUtility:
+
+    @pytest.mark.straightBetween
+    def test_get_between_exclusive_straight_right(self):
+        start = 'a6'
+        end = 'g6'
+        result = get_between_exclusive(start, end)
+
+        assert result == ['b6', 'c6', 'd6', 'e6', 'f6']
+
+    @pytest.mark.straightBetween
+    def test_get_between_exclusive_straight_left(self):
+        start = 'g6'
+        end = 'a6'
+        result = get_between_exclusive(start, end)
+
+        assert result == ['f6', 'e6', 'd6', 'c6', 'b6']
+
+    @pytest.mark.straightBetween
+    def test_get_between_exclusive_straight_down(self):
+        start = 'g6'
+        end = 'g2'
+        result = get_between_exclusive(start, end)
+
+        assert result == ['g5', 'g4', 'g3']
+
+    @pytest.mark.straightBetween
+    def test_get_between_exclusive_straight_up(self):
+        start = 'e2'
+        end = 'e6'
+        result = get_between_exclusive(start, end)
+
+        assert result == ['e3', 'e4', 'e5']
+
+    @pytest.mark.diagonalBetween
+    def test_get_between_exclusive_diagonal_up_left(self):
+        start = 'e2'
+        end = 'a6'
+        result = get_between_exclusive(start, end)
+
+        assert result == ['d3', 'c4', 'b5']
+
+    @pytest.mark.diagonalBetween
+    def test_get_between_exclusive_diagonal_down_left(self):
+        start = 'f6'
+        end = 'b2'
+        result = get_between_exclusive(start, end)
+
+        assert result == ['e5', 'd4', 'c3']
+
+    @pytest.mark.diagonalBetween
+    def test_get_between_exclusive_diagonal_up_right(self):
+        start = 'b2'
+        end = 'f6'
+        result = get_between_exclusive(start, end)
+
+        assert result == ['c3', 'd4', 'e5']
+
+    @pytest.mark.diagonalBetween
+    def test_get_between_exclusive_diagonal_down_right(self):
+        start = 'b7'
+        end = 'f3'
+        result = get_between_exclusive(start, end)
+
+        assert result == ['c6', 'd5', 'e4']
+
+    @pytest.mark.king
+    def test_king_safe_moves_after_check(self, monkeypatch):
+        teams, board = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectB1)
+        monkeypatch.setattr(game, 'get_target_position', selectC3)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectC3)
+        monkeypatch.setattr(game, 'get_target_position', selectE4)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE4)
+        monkeypatch.setattr(game, 'get_target_position', selectD6)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        teams = update_team_threat((cy_team, ye_team), board)
+        board.print_board()
+
+        check = checkmate(cy_team, ye_team, board.squares)
+
+        print('Check? {}'.format(check))
+
+        assert result == 0
+
+    @pytest.mark.king
+    def test_king_moving_into_threatened_square(self, monkeypatch):
+        teams, board = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
+        monkeypatch.setattr(game, 'get_target_position', selectE4)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE4)
+        monkeypatch.setattr(game, 'get_target_position', selectE5)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD7)
+        monkeypatch.setattr(game, 'get_target_position', selectD5)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
+        monkeypatch.setattr(game, 'get_target_position', selectE2)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
+        monkeypatch.setattr(game, 'get_target_position', selectE3)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE3)
+        monkeypatch.setattr(game, 'get_target_position', selectE4)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        teams = update_team_threat((cy_team, ye_team), board)
+        board.print_board()
+        print('{} threatens: {}'.format(teams[1].colour, teams[1].threatening))
+
+        assert result == 0
+
     @pytest.mark.check
     def test_check(self,monkeypatch):
         teams, board = testing_environment()
@@ -154,23 +293,23 @@ class TestUtility:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF2)
         monkeypatch.setattr(game, 'get_target_position', selectF3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectE6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD8)
         monkeypatch.setattr(game, 'get_target_position', selectH4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
-
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
         
         teams = update_team_threat((cy_team, ye_team), board)
         # yellow is mating cyan
-        result = checkmate(ye_team, cy_team, board.squares)
+        result = checkmate(ye_team, cy_team, board.squares, board)
+        # board.print_board()
 
         assert result == 'check'
 
@@ -183,23 +322,23 @@ class TestUtility:
         
         monkeypatch.setattr(game, 'get_piece_to_move', selectF2)
         monkeypatch.setattr(game, 'get_target_position', selectF3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectE5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE5)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD8)
         monkeypatch.setattr(game, 'get_target_position', selectH4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         teams = update_team_threat(teams, board)
         yeQueen_threats = []
@@ -222,33 +361,33 @@ class TestUtility:
         
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
         monkeypatch.setattr(game, 'get_target_position', selectE2)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectE5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE8)
         monkeypatch.setattr(game, 'get_target_position', selectE7)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectE6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         teams = update_team_threat(teams, board)
         cyKing_threats = []
@@ -274,13 +413,13 @@ class TestUtility:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC1)
         monkeypatch.setattr(game, 'get_target_position', selectF4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
         
         teams = update_team_threat(teams, board)
 
@@ -303,33 +442,33 @@ class TestUtility:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA4)
         monkeypatch.setattr(game, 'get_target_position', selectA5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA5)
         monkeypatch.setattr(game, 'get_target_position', selectA6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA1)
         monkeypatch.setattr(game, 'get_target_position', selectA5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA5)
         monkeypatch.setattr(game, 'get_target_position', selectE5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE5)
         monkeypatch.setattr(game, 'get_target_position', selectE6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         teams = update_team_threat(teams, board)
 
@@ -352,23 +491,23 @@ class TestUtility:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB2)
         monkeypatch.setattr(game, 'get_target_position', selectB3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD7)
         monkeypatch.setattr(game, 'get_target_position', selectD5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectE6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         teams = update_team_threat(teams, board)
         cyPawn_threats = []
@@ -405,18 +544,18 @@ class TestUtility:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectE5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD4)
         monkeypatch.setattr(game, 'get_target_position', selectE5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 1
 
@@ -432,18 +571,18 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD1)
         monkeypatch.setattr(game, 'get_target_position', selectD3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD3)
         monkeypatch.setattr(game, 'get_target_position', selectG3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 1
 
@@ -455,18 +594,18 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD1)
         monkeypatch.setattr(game, 'get_target_position', selectD3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD3)
         monkeypatch.setattr(game, 'get_target_position', selectG6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 1
 
@@ -478,13 +617,13 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD1)
         monkeypatch.setattr(game, 'get_target_position', selectE3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0
 
@@ -500,23 +639,23 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
         monkeypatch.setattr(game, 'get_target_position', selectE2)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectF3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF3)
         monkeypatch.setattr(game, 'get_target_position', selectG4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 1
 
@@ -531,45 +670,45 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC2)
         monkeypatch.setattr(game, 'get_target_position', selectC3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD1)
         monkeypatch.setattr(game, 'get_target_position', selectB3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB3)
         monkeypatch.setattr(game, 'get_target_position', selectB7)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB8)
         monkeypatch.setattr(game, 'get_target_position', selectC6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD7)
         monkeypatch.setattr(game, 'get_target_position', selectD6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC8)
         monkeypatch.setattr(game, 'get_target_position', selectE6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD8)
         monkeypatch.setattr(game, 'get_target_position', selectD7)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         teams = update_team_threat(teams, board)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE8)
         monkeypatch.setattr(game, 'get_target_position', selectC8)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         board.print_board()
 
@@ -585,28 +724,28 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB8)
         monkeypatch.setattr(game, 'get_target_position', selectC6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD7)
         monkeypatch.setattr(game, 'get_target_position', selectD6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC8)
         monkeypatch.setattr(game, 'get_target_position', selectE6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD8)
         monkeypatch.setattr(game, 'get_target_position', selectD7)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE8)
         monkeypatch.setattr(game, 'get_target_position', selectC8)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         assert board.squares['c8'].type == 'king' and board.squares['d8'].type == 'rook'
 
@@ -620,28 +759,28 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB1)
         monkeypatch.setattr(game, 'get_target_position', selectC3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC1)
         monkeypatch.setattr(game, 'get_target_position', selectE3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD1)
         monkeypatch.setattr(game, 'get_target_position', selectD2)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
         monkeypatch.setattr(game, 'get_target_position', selectC1)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert board.squares['c1'].type == 'king' and board.squares['d1'].type == 'rook'
 
@@ -656,53 +795,53 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG1)
         monkeypatch.setattr(game, 'get_target_position', selectF3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF3)
         monkeypatch.setattr(game, 'get_target_position', selectD4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF1)
         monkeypatch.setattr(game, 'get_target_position', selectB5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF2)
         monkeypatch.setattr(game, 'get_target_position', selectF4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF4)
         monkeypatch.setattr(game, 'get_target_position', selectF5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF5)
         monkeypatch.setattr(game, 'get_target_position', selectF6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF6)
         monkeypatch.setattr(game, 'get_target_position', selectE7)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD8)
         monkeypatch.setattr(game, 'get_target_position', selectE7)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectF6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         teams = update_team_threat(teams, board)
         for piece in teams[1].pieces:
@@ -711,8 +850,8 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
         monkeypatch.setattr(game, 'get_target_position', selectG1)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
         
         board.print_board()
 
@@ -728,23 +867,23 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG8)
         monkeypatch.setattr(game, 'get_target_position', selectF6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG7)
         monkeypatch.setattr(game, 'get_target_position', selectG6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF8)
         monkeypatch.setattr(game, 'get_target_position', selectH6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE8)
         monkeypatch.setattr(game, 'get_target_position', selectG8)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         board.print_board()
 
@@ -760,23 +899,23 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG1)
         monkeypatch.setattr(game, 'get_target_position', selectF3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG2)
         monkeypatch.setattr(game, 'get_target_position', selectG3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF1)
         monkeypatch.setattr(game, 'get_target_position', selectH3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
         monkeypatch.setattr(game, 'get_target_position', selectG1)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         board.print_board()
 
@@ -790,13 +929,13 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
         monkeypatch.setattr(game, 'get_target_position', selectE5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE8)
         monkeypatch.setattr(game, 'get_target_position', selectE7)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         assert result == 1
 
@@ -808,13 +947,13 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
         monkeypatch.setattr(game, 'get_target_position', selectE2)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 1
 
@@ -826,13 +965,13 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
         monkeypatch.setattr(game, 'get_target_position', selectE3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0
 
@@ -844,23 +983,23 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE1)
         monkeypatch.setattr(game, 'get_target_position', selectE2)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
         monkeypatch.setattr(game, 'get_target_position', selectE3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE3)
         monkeypatch.setattr(game, 'get_target_position', selectA3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0
 
@@ -875,18 +1014,18 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC1)
         monkeypatch.setattr(game, 'get_target_position', selectE3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE3)
         monkeypatch.setattr(game, 'get_target_position', selectF5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0
 
@@ -898,18 +1037,18 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectD2)
         monkeypatch.setattr(game, 'get_target_position', selectD3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC1)
         monkeypatch.setattr(game, 'get_target_position', selectE3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectE3)
         monkeypatch.setattr(game, 'get_target_position', selectH3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0
 
@@ -921,13 +1060,13 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC2)
         monkeypatch.setattr(game, 'get_target_position', selectC4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectC1)
         monkeypatch.setattr(game, 'get_target_position', selectC3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0
 
@@ -942,8 +1081,8 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG8)
         monkeypatch.setattr(game, 'get_target_position', selectF3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         assert result == 0
 
@@ -955,13 +1094,13 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG8)
         monkeypatch.setattr(game, 'get_target_position', selectF6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectF6)
         monkeypatch.setattr(game, 'get_target_position', selectF8)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         assert result == 0
 
@@ -973,8 +1112,8 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectG8)
         monkeypatch.setattr(game, 'get_target_position', selectF6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         assert result == 1
 
@@ -986,8 +1125,8 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB1)
         monkeypatch.setattr(game, 'get_target_position', selectC3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 1
 
@@ -1002,18 +1141,18 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA1)
         monkeypatch.setattr(game, 'get_target_position', selectA3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA3)
         monkeypatch.setattr(game, 'get_target_position', selectC5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0
 
@@ -1025,33 +1164,33 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectH2)
         monkeypatch.setattr(game, 'get_target_position', selectH4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectH7)
         monkeypatch.setattr(game, 'get_target_position', selectH5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectH1)
         monkeypatch.setattr(game, 'get_target_position', selectH3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectH8)
         monkeypatch.setattr(game, 'get_target_position', selectH6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectH3)
         monkeypatch.setattr(game, 'get_target_position', selectC3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectH6)
         monkeypatch.setattr(game, 'get_target_position', selectD6)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         assert result == 1
 
@@ -1066,13 +1205,13 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA3)
         monkeypatch.setattr(game, 'get_target_position', selectB4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0
 
@@ -1084,18 +1223,18 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB2)
         monkeypatch.setattr(game, 'get_target_position', selectB4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA3)
         monkeypatch.setattr(game, 'get_target_position', selectA5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0
 
@@ -1107,18 +1246,18 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB7)
         monkeypatch.setattr(game, 'get_target_position', selectB5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA4)
         monkeypatch.setattr(game, 'get_target_position', selectB5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 1
 
@@ -1130,23 +1269,23 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA3)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB7)
         monkeypatch.setattr(game, 'get_target_position', selectB5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA3)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectB5)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         assert result == 1
 
@@ -1158,17 +1297,17 @@ class TestPieceMovement:
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA2)
         monkeypatch.setattr(game, 'get_target_position', selectA4)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA7)
         monkeypatch.setattr(game, 'get_target_position', selectA5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(ye_team, cy_team)
-        act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, ye_team)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
 
         monkeypatch.setattr(game, 'get_piece_to_move', selectA4)
         monkeypatch.setattr(game, 'get_target_position', selectA5)
-        move_result, curr_pos, tar_pos, curr_x_y, tar_x_y = player_move(cy_team, ye_team)
-        result = act_on_result(move_result, curr_pos, tar_pos, curr_x_y, tar_x_y, cy_team)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         assert result == 0

@@ -7,7 +7,7 @@ import re
 class Board:
     """A representation of the board
     - Bottom and left axes: what the player sees
-    - Top and right axes: what the computer sees
+    - Top and right axes: what the computer sees.
       |0|1|2|3|4|5|6|7|
      8| | | | | | | | |0
      7| | | | | | | | |1
