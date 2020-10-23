@@ -286,7 +286,35 @@ class TestUtility:
         assert result == 0
 
     @pytest.mark.check
-    def test_check(self,monkeypatch):
+    def test_yellow_check(self,monkeypatch):
+        teams, board = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD7)
+        monkeypatch.setattr(game, 'get_target_position', selectD6)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectC2)
+        monkeypatch.setattr(game, 'get_target_position', selectC3)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD1)
+        monkeypatch.setattr(game, 'get_target_position', selectA4)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+        
+        teams = update_team_threat((cy_team, ye_team), board)
+        # cyan is mating yellow
+        result = checkmate(cy_team, ye_team, board.squares, board)
+        board.print_board()
+
+        assert result == 'check'
+    
+    @pytest.mark.check
+    def test_cyan_check(self,monkeypatch):
         teams, board = testing_environment()
         cy_team = teams[0]
         ye_team = teams[1]
@@ -309,7 +337,7 @@ class TestUtility:
         teams = update_team_threat((cy_team, ye_team), board)
         # yellow is mating cyan
         result = checkmate(ye_team, cy_team, board.squares, board)
-        # board.print_board()
+        board.print_board()
 
         assert result == 'check'
 

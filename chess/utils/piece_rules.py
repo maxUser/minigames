@@ -71,8 +71,9 @@ def king_rules(team, oppo_team, curr_pos, tar_pos, board):
         return 'illegal'
 
     elif tar_pos in oppo_team.threatening:
-        # TODO
-        print('yes')
+        # king cannot move into check
+        return 'illegal'
+        
 
     return None
 

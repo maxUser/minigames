@@ -12,11 +12,16 @@ def checkmate(team, oppo_team, squares, board):
             squares = dictionary of squares on the board and what they contain
     """
     oppo_team_king_pos = [piece.pos for piece in oppo_team.pieces if piece.type == 'king'][0]
+    # for piece in team.pieces:
+    #     print('{}: {}'.format(piece, piece.threatening))
     try:
         # Determine which piece is threatening the king
         threatening_piece = [piece for piece in team.pieces if oppo_team_king_pos in piece.threatening][0]
-    except IndexError as err:
-        return err
+        """TODO: THREAT NOT UPDATING - OBJECTS NOT BEING PASSED AROUDN CORRECTLY"""
+        print(threatening_piece)
+    except IndexError:
+        # Get here if the move did not threaten enemy king
+        return False
 
     threatening_piece_pos = threatening_piece.pos
 
@@ -24,6 +29,7 @@ def checkmate(team, oppo_team, squares, board):
     if oppo_team_king_pos in team.threatening:
         print('{} is in check!'.format([piece for piece in oppo_team.pieces if piece.type == 'king'][0]))
     else:
+        print('resolve-check')
         return False
 
     # Second, resolve possible escape from check
@@ -35,27 +41,33 @@ def checkmate(team, oppo_team, squares, board):
         if get_king_safe_moves(oppo_team_king_pos, team, squares) or is_threatened(threatening_piece_pos, oppo_team):
             # if the king has a place to move out of check, or
             # if piece checking king can be taken
-            return 'check'
+            return False
         else:
             return 'checkmate'
     else:
         # same as above + need to check if a piece from the king-in-check's team
-        # can move into the path of the threatening piece.
-        
+        # can move into the path of the threatening piece.      
         # 1) Get path between threatening piece and king
         squares_between = get_between_exclusive(threatening_piece_pos, oppo_team_king_pos)
         # 2) Determine whether a piece can move into one of the squares between the threat and the king
-        # FUCK
-        
+        for target in squares_between:
+            for piece in oppo_team.pieces:
+                result = check_move(oppo_team, team, piece.pos, target, board)
+                if result != 'illegal' and piece.type != 'king':
+                    return 'check'
 
-
-    
-    return 'checkmate'
+    return True
 
 def check_move(team, oppo_team, curr_pos, tar_pos, board):
     """
     The logic: check if move is illegal, if not determine
                whether it is a take or move action.
+        Args:
+            team: a Team object representing the team of the piece that is moving
+            oppo_team: a Team object representing the opposing team of the piece that is moving
+            curr_pos (str): the current board position of the piece that is moving (eg. 'a2')
+            tar_pos (str): the square on the board that the piece is being moved to (eg. 'a4')
+            board: a Board object containing the position of all pieces
     """
     colour = team.colour
     result = 'no_result'

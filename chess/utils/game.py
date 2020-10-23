@@ -124,19 +124,20 @@ def run_game():
         print()
         team = teams[i%2]
         oppo_team = teams[(i+1)%2]
-
-        move_result, curr_pos, tar_pos = player_move(team, oppo_team)
-        teams = update_team_threat(teams, board)
-        if move_result in ('take', 'move', 'kingside_castle', 'queenside_castle'):
-            win = checkmate(team, oppo_team, board.squares, board)
-
-        if move_result == 'take':
-            # add taken piece to opposing team's graveyard
-            oppo_team.graveyard.append(board.squares[tar_pos])
-            win = checkmate(team, oppo_team, board.squares, board)
+        curr_teams = (team, oppo_team)
         
+        move_result, curr_pos, tar_pos = player_move(curr_teams[0], curr_teams[1])
+        i += act_on_result(move_result, curr_pos, tar_pos, curr_teams[0])
 
-        i += act_on_result(move_result, curr_pos, tar_pos, team)
+        if move_result in ('take', 'move', 'kingside_castle', 'queenside_castle'):
+            curr_teams = update_team_threat(curr_teams, board)
+            for piece in curr_teams[0].pieces:
+                print('{}: {}'.format(piece, piece.threatening))
+            win = checkmate(curr_teams[0], curr_teams[1], board.squares, board)
+
+            if move_result == 'take':
+                # add taken piece to opposing team's graveyard
+                curr_teams[1].graveyard.append(board.squares[tar_pos])
 
     print('game over') 
         
