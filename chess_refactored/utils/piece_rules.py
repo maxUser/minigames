@@ -92,35 +92,32 @@ def bishop_rules(curr_pos, tar_pos):
 
     return None
 
-def knight_rules(curr_pos, tar_pos):
+def knight_rules(piece, target):
     """
         Knights can only move in an L shape.
         Ensure the tar_pos is +-2 x or y and
         +- 1 x or y.
-        Example scenarios (Cyan):
+        Example scenarios (White):
         1) Move up (y-2) and left (x-1)
         2) Move right (x+2) and up (y-1)
         3) Move down (y+2) and left (x-1)
-        x operators are swapped for yellow
+        x operators are swapped for Black
     """
-    from utils.helper import letter_to_number, y_flip
-    curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
-    tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
+    from utils.helper import letter_to_number
+    piece_x = letter_to_number(piece.pos[0])
+    target_x = letter_to_number(target[0])
+    piece_y = int(piece.pos[1])
+    target_y = int(target[1])
 
-    if abs(curr_x_y[0] - tar_x_y[0]) == 1:
+    if abs(piece_x - target_x) == 1 and abs(piece_y - target_y) == 2:
         # up or down move
-        if abs(curr_x_y[1] - tar_x_y[1]) != 2:
-            # diff in y must == 2
-            return 'illegal'
-    elif abs(curr_x_y[1] - tar_x_y[1]) == 1:
+        return True
+    elif abs(piece_y - target_y) == 1 and abs(piece_x - target_x) == 2:
         # lateral move
-        if abs(curr_x_y[0] - tar_x_y[0]) != 2:
-            # diff in y must == 2
-            return 'illegal'
+        return True
     else:
-        return 'illegal'
+        return False
 
-    return None
 
 def rook_rules(piece, target):
     # Cannot move diagonally
