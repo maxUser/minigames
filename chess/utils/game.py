@@ -81,8 +81,6 @@ def act_on_result(result, curr_pos, tar_pos, team):
         # update internal representation of board
         board.move_piece(curr_pos, tar_pos)
 
-        print('{} threatening {}'.format(board.squares[tar_pos], board.squares[tar_pos].threatening))
-
         return 1
 
     elif result == 'move':
@@ -115,30 +113,31 @@ def run_game():
     i = 0
 
     cy_team, ye_team = board.initialize_squares(teams)
-    
     teams = update_team_threat(teams, board)
 
     while win is not True:
-        print()
         board.print_board()
-        print()
         team = teams[i%2]
         oppo_team = teams[(i+1)%2]
-        curr_teams = (team, oppo_team)
-        
+        curr_teams = [team, oppo_team]
+
+        if curr_teams[0].check is True:
+            print('This team is in check and must move out of it')
+
         move_result, curr_pos, tar_pos = player_move(curr_teams[0], curr_teams[1])
         i += act_on_result(move_result, curr_pos, tar_pos, curr_teams[0])
 
         if move_result in ('take', 'move', 'kingside_castle', 'queenside_castle'):
             curr_teams = update_team_threat(curr_teams, board)
-            for piece in curr_teams[0].pieces:
-                print('{}: {}'.format(piece, piece.threatening))
-            win = checkmate(curr_teams[0], curr_teams[1], board.squares, board)
+            win, curr_teams[0] = checkmate(curr_teams[0], curr_teams[1], board.squares, board)
 
             if move_result == 'take':
                 # add taken piece to opposing team's graveyard
                 curr_teams[1].graveyard.append(board.squares[tar_pos])
-
-    print('game over') 
+    
+    board.print_board()
+    print('Checkmate!') 
+    print(i)
+    print('{} wins'.format(teams[i+1%2].colour))
         
         

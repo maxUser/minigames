@@ -1,6 +1,7 @@
 class Team:
 
     def __init__(self, colour):
+        self.check = False
         self.colour = colour
         self.graveyard = []
         self.threatening = []

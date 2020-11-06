@@ -280,10 +280,97 @@ class TestUtility:
         result = act_on_result(move_result, curr_pos, tar_pos, cy_team)
 
         teams = update_team_threat((cy_team, ye_team), board)
-        board.print_board()
+        # board.print_board()
         print('{} threatens: {}'.format(teams[1].colour, teams[1].threatening))
 
         assert result == 0
+
+    @pytest.mark.checkmate
+    def test_yellow_knight_checkmate(self, monkeypatch):
+        teams, board = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectB8)
+        monkeypatch.setattr(game, 'get_target_position', selectC6)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectC6)
+        monkeypatch.setattr(game, 'get_target_position', selectD4)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD4)
+        monkeypatch.setattr(game, 'get_target_position', selectF3)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
+        monkeypatch.setattr(game, 'get_target_position', selectE3)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectG1)
+        monkeypatch.setattr(game, 'get_target_position', selectE2)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectG2)
+        monkeypatch.setattr(game, 'get_target_position', selectG3)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        teams = update_team_threat((ye_team, cy_team), board)
+        # yellow is mating cyan
+        result, _ = checkmate(teams[0], teams[1], board.squares, board)
+        # board.print_board()
+
+        assert result == True
+
+    @pytest.mark.checkmate
+    def test_cyan_knight_checkmate(self, monkeypatch):
+        teams, board = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectB1)
+        monkeypatch.setattr(game, 'get_target_position', selectC3)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectC3)
+        monkeypatch.setattr(game, 'get_target_position', selectD5)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD5)
+        monkeypatch.setattr(game, 'get_target_position', selectF6)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE7)
+        monkeypatch.setattr(game, 'get_target_position', selectE6)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectG7)
+        monkeypatch.setattr(game, 'get_target_position', selectG6)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectG8)
+        monkeypatch.setattr(game, 'get_target_position', selectE7)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        teams = update_team_threat((cy_team, ye_team), board)
+        # cyan is mating yellow
+        result, _ = checkmate(teams[0], teams[1], board.squares, board)
+        # board.print_board()
+
+        assert result == True
+
 
     @pytest.mark.check
     def test_yellow_check(self,monkeypatch):
@@ -307,11 +394,11 @@ class TestUtility:
         act_on_result(move_result, curr_pos, tar_pos, cy_team)
         
         teams = update_team_threat((cy_team, ye_team), board)
-        # cyan is mating yellow
-        result = checkmate(cy_team, ye_team, board.squares, board)
-        board.print_board()
+        # cyan is checking yellow
+        result, team = checkmate(cy_team, ye_team, board.squares, board)
+        # board.print_board()
 
-        assert result == 'check'
+        assert team.check == True and result == False
     
     @pytest.mark.check
     def test_cyan_check(self,monkeypatch):
@@ -335,11 +422,45 @@ class TestUtility:
         act_on_result(move_result, curr_pos, tar_pos, ye_team)
         
         teams = update_team_threat((cy_team, ye_team), board)
-        # yellow is mating cyan
-        result = checkmate(ye_team, cy_team, board.squares, board)
-        board.print_board()
+        # yellow is checking cyan
+        result, team = checkmate(ye_team, cy_team, board.squares, board)
+        # board.print_board()
 
-        assert result == 'check'
+        assert result == False and team.check == True
+
+    @pytest.mark.check
+    def test_cyan_check2(self,monkeypatch):
+        teams, board = testing_environment()
+        cy_team = teams[0]
+        ye_team = teams[1]
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectE2)
+        monkeypatch.setattr(game, 'get_target_position', selectE4)
+        move_result, curr_pos, tar_pos = player_move(cy_team, ye_team)
+        act_on_result(move_result, curr_pos, tar_pos, cy_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD7)
+        monkeypatch.setattr(game, 'get_target_position', selectD5)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD5)
+        monkeypatch.setattr(game, 'get_target_position', selectE4)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+
+        monkeypatch.setattr(game, 'get_piece_to_move', selectD8)
+        monkeypatch.setattr(game, 'get_target_position', selectD2)
+        move_result, curr_pos, tar_pos = player_move(ye_team, cy_team)
+        act_on_result(move_result, curr_pos, tar_pos, ye_team)
+        
+        teams = update_team_threat((cy_team, ye_team), board)
+        # yellow is checking cyan
+        result, team = checkmate(ye_team, cy_team, board.squares, board)
+        board.print_board()
+        result_tuple = (result, team.check)
+
+        assert result_tuple == (False, True)#result == False# and team.check == True
 
     @pytest.mark.queen
     @pytest.mark.queenThreat

@@ -150,7 +150,7 @@ class Board:
     def print_board(self):
         x_axis = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         y_axis = ['8', '7', '6', '5', '4', '3', '2', '1']
-
+        print()
         print('  ===================================')
 
         axis_count = 0
@@ -180,4 +180,5 @@ class Board:
                 print('     '+x, end=' ')
             else:
                 print('  '+x, end=' ')
+        print()
         print()

@@ -28,9 +28,8 @@ class Piece:
         if self.pos == 'graveyard':
             self.threatening = []
             return
-        #old_threatening = []
+        
         if self.threatening:
-            #old_threatening = self.threatening
             self.threatening = []
        
         x = letter_to_number(self.pos[0])
