@@ -14,3 +14,13 @@
 /.vs/slnx.sqlite
 /chess/tests/__pycache__/test_game.cpython-38-pytest-6.0.1.pyc
 /chess/utils/__pycache__/piece_rules.cpython-38.pyc
+/chess_refactored/objects/__pycache__/__init__.cpython-38.pyc
+/chess_refactored/objects/__pycache__/board.cpython-38.pyc
+/chess_refactored/objects/__pycache__/piece.cpython-38.pyc
+/chess_refactored/objects/__pycache__/team.cpython-38.pyc
+/chess_refactored/test/__pycache__/__init__.cpython-38.pyc
+/chess_refactored/test/__pycache__/test_game.cpython-38-pytest-6.0.1.pyc
+/chess_refactored/utils/__pycache__/game.cpython-38.pyc
+/chess_refactored/utils/__pycache__/helper.cpython-38.pyc
+/chess_refactored/utils/__pycache__/piece_rules.cpython-38.pyc
+/chess_refactored/utils/__pycache__/setup.cpython-38.pyc
