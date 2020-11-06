@@ -11,11 +11,13 @@ def run_game():
         team = teams[i%2]
         oppo_team = teams[(i+1)%2]
         print('\n{}\'s turn\n'.format(team.colour))
- 
+
+        # Get input
         piece_to_move = get_piece_to_move(piece_to_move_prompt(), team)
         target = target_square_prompt()
+        # Check input
         legal = check_move_legality(board, piece_to_move, target)
-        
+        # Act on input
         if legal is True:
             move_or_take = move_or_take(board, piece_to_move, target)
             board.move_piece(piece_to_move, target)

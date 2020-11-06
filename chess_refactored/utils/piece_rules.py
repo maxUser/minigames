@@ -122,13 +122,11 @@ def knight_rules(curr_pos, tar_pos):
 
     return None
 
-def rook_rules(curr_pos, tar_pos):
-    from utils.helper import letter_to_number, y_flip
+def rook_rules(piece, target):
     # Cannot move diagonally
-    if curr_pos[0] != tar_pos[0] and curr_pos[1] != tar_pos[1]:
-        return 'illegal'
-
-    return None
+    if piece.pos[0] != target[0] and piece.pos[1] != target[1]:
+        return False
+    return True
 
 def pawn_rules(board, piece, target):
     # Cannot move backwards

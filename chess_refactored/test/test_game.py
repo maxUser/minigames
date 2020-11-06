@@ -28,6 +28,34 @@ class TestSelection:
         board, black, piece_to_move, legal = run_game_test(board, black, 'b6', 'b4')
         assert legal == False
 
+class TestRookRules:
+    @pytest.mark.rook
+    def test_rook_diagonal_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'a2', 'a4')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'a1', 'a3')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'a3', 'd6')
+        assert legal == False
+    
+    @pytest.mark.rook
+    def test_rook_diagonal_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'h7', 'h5')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'h8', 'h6')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'h6', 'g5')
+        assert legal == False
+
+    @pytest.mark.rook
+    def test_rook_lateral_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'h7', 'h5')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'h8', 'h6')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'h6', 'c6')
+        assert legal == True
+
 class TestPawnRules:
     @pytest.mark.pawn
     def test_pawn_backward_white(self):

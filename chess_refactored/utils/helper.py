@@ -20,8 +20,8 @@ def check_move_legality(board, piece, target):
     result = True
     if piece.type == 'pawn':
         result = pawn_rules(board, piece, target)
-    # elif piece.type == 'rook':
-    #     result = rook_rules()
+    elif piece.type == 'rook':
+        result = rook_rules(piece, target)
     # elif piece.type == 'knight':
     #     result = knight_rules()
     # elif piece.type == 'bishop':
