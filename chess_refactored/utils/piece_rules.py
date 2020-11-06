@@ -75,22 +75,20 @@ def king_rules(team, oppo_team, curr_pos, tar_pos, board):
 
     return None
 
-def bishop_rules(curr_pos, tar_pos):
-    from utils.helper import letter_to_number, y_flip
-    curr_x_y = [letter_to_number(curr_pos[0]), y_flip(curr_pos[1])]
-    tar_x_y = [letter_to_number(tar_pos[0]), y_flip(tar_pos[1])]
-
+def bishop_rules(piece, target):
+    from utils.helper import letter_to_number
+    piece_x = letter_to_number(piece.pos[0])
+    target_x = letter_to_number(target[0])
+    piece_y = int(piece.pos[1])
+    target_y = int(target[1])
     # Can only move diagonally
-    # Difference in x == difference in y
-    if curr_pos[0] == tar_pos[0] or curr_pos[1] == tar_pos[1]:
+    if piece_x == target_x or piece_y == target_y:
         # disallow straight or lateral movement
-        return 'illegal'
-
-    if abs(curr_x_y[0] - tar_x_y[0]) - abs(curr_x_y[1] - tar_x_y[1]) != 0:
-        # disallow awkward moves like E3 to F5
-        return 'illegal'
-
-    return None
+        return False
+    # disallow awkward moves like E3 to F5
+    if abs(piece_x - target_x) - abs(piece_y - target_y) != 0:
+        return False
+    return True
 
 def knight_rules(piece, target):
     """
@@ -117,7 +115,6 @@ def knight_rules(piece, target):
         return True
     else:
         return False
-
 
 def rook_rules(piece, target):
     # Cannot move diagonally

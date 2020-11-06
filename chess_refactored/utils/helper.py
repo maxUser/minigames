@@ -24,8 +24,8 @@ def check_move_legality(board, piece, target):
         result = rook_rules(piece, target)
     elif piece.type == 'knight':
         result = knight_rules(piece, target)
-    # elif piece.type == 'bishop':
-    #     result = bishop_rules()
+    elif piece.type == 'bishop':
+        result = bishop_rules(piece, target)
     # elif piece.type == 'king':
     #     result = king_rules()
     # elif piece.type == 'queen':

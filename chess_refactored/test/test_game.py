@@ -2,6 +2,55 @@ import pytest
 from utils.setup import setup_game
 from utils.game import run_game_test
 
+class TestBishopRules:
+    @pytest.mark.bishop
+    def test_bishop_straight_move_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c2', 'c4')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c1', 'c3')
+        assert legal == False
+
+    @pytest.mark.bishop
+    def test_bishop_straight_move_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c7', 'c5')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c8', 'c6')
+        assert legal == False
+
+    @pytest.mark.bishop
+    def test_bishop_lateral_move_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'b1', 'a3')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c1', 'b1')
+        assert legal == False
+
+    @pytest.mark.bishop
+    def test_bishop_lateral_move_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'g8', 'h6')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'f8', 'g8')
+        assert legal == False
+
+    @pytest.mark.bishop
+    def test_bishop_good_move_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'd2', 'd3')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c1', 'f4')
+        assert legal == True
+
+    @pytest.mark.bishop
+    def test_bishop_good_move_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'd7', 'd6')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c8', 'h3')
+        assert legal == True
+
 class TestKnightRules:
     @pytest.mark.knight
     def test_knight_good_move_white(self):
