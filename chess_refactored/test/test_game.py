@@ -15,7 +15,20 @@ class TestObjectsUpdatingAfterMovement:
         board, black, piece_to_move, legal = run_game_test(board, black, 'b8', 'a6')
         assert board.squares['a6'] is not None and board.squares['b8'] is None and piece_to_move.pos == 'a6' and [piece for piece in black.pieces if piece.pos == 'a6']
 
-class TestPieceRules:
+class TestSelection:
+    def test_select_empty_square_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'a3', 'a4')
+        assert legal == False
+
+    def test_select_empty_square_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'b6', 'b4')
+        assert legal == False
+
+class TestPawnRules:
     @pytest.mark.pawn
     def test_pawn_backward_white(self):
         board, teams = setup_game()
@@ -31,6 +44,122 @@ class TestPieceRules:
         board, white, piece_to_move, legal = run_game_test(board, white, 'a2', 'b3')
         assert legal == False
 
+    @pytest.mark.pawn
+    def test_pawn_lateral_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'a2', 'a3')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'a3', 'c3')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_illegal_double_move_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c2', 'c3')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c3', 'c5')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_illegal_triple_move_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c2', 'c5')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_take_straight_ahead_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        black = teams[1]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c2', 'c4')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c7', 'c5')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c4', 'c5')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_take_pawn_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        black = teams[1]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c2', 'c4')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'b7', 'c5')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c4', 'c5')
+        assert legal == True
+
+    @pytest.mark.pawn
+    def test_pawn_take_same_team_pawn_white(self):
+        board, teams = setup_game()
+        white = teams[0]
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c2', 'c3')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'b2', 'c3')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_backward_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'a7', 'a5')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'a5', 'a6')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_diagonal_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'a7', 'b6')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_lateral_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'a7', 'a6')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'a6', 'c6')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_illegal_double_move_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c7', 'c6')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c6', 'c4')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_illegal_triple_move_black(self):
+        board, teams = setup_game()
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c7', 'c4')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_take_straight_ahead_black(self):
+        board, teams = setup_game()
+        white = teams[0]
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c7', 'c5')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'c2', 'c4')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c5', 'c4')
+        assert legal == False
+
+    @pytest.mark.pawn
+    def test_pawn_take_pawn_black(self):
+        board, teams = setup_game()
+        white = teams[0]
+        black = teams[1]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c7', 'c5')
+        board, white, piece_to_move, legal = run_game_test(board, white, 'b2', 'c4')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c5', 'c4')
+        assert legal == True
+
+    @pytest.mark.pawn
+    def test_pawn_take_same_team_pawn_black(self):
+        board, teams = setup_game()
+        black = teams[0]
+        board, black, piece_to_move, legal = run_game_test(board, black, 'c7', 'c6')
+        board, black, piece_to_move, legal = run_game_test(board, black, 'b7', 'c6')
+        assert legal == False
 
     
 

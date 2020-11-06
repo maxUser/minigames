@@ -136,30 +136,16 @@ def pawn_rules(board, piece, target):
         return False
     elif piece.team.colour == 'black' and piece.pos[1] < target[1]:
         return False
-    # Cannot move diagonally
+    # Cannot move diagonally if no target piece
     if piece.pos[0] != target[0] and board.squares[target] is None:
         return False
-
+    # Cannot move >2 squares
+    if abs(int(piece.pos[1])-int(target[1])) > 2:
+        return False
+    # Cannot move >1 square if already moved
+    if piece.moved is True and abs(int(piece.pos[1])-int(target[1])) > 1:
+        return False
+    # Cannot take piece straight ahead
+    if piece.pos[0] == target[0] and board.squares[target] is not None:
+        return False
     return True
-
-    # # Cannot take piece with same x value
-    # if tar_x_y[0] == curr_x_y[0] and board.squares[tar_pos] != '':
-    #     return 'illegal'
-
-
-    # # Can only move forward by 1 square unless moving from
-    # # starting position, then can move 1 or 2 squares forward
-    # if not board.squares[curr_pos].initial_pos:
-    #     if abs(curr_x_y[1] - tar_x_y[1]) != 1:
-    #         return 'illegal'
-    # elif board.squares[curr_pos].initial_pos:
-    #     if abs(curr_x_y[1] - tar_x_y[1]) > 2:
-    #         return 'illegal'
-
-    # # Take piece diagonally
-    # if tar_x_y[0] != curr_x_y[0] and board.squares[tar_pos] != '' and curr_x_y[1] - tar_x_y[1] == 1 and colour == 'cyan':
-    #     return 'take'
-    # elif tar_x_y[0] != curr_x_y[0] and board.squares[tar_pos] != '' and curr_x_y[1] - tar_x_y[1] == -1 and colour == 'yellow':
-    #     return 'take'
-
-    # return None

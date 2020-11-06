@@ -1,8 +1,14 @@
 from utils.piece_rules import (queen_rules, king_rules, bishop_rules,
                         knight_rules, rook_rules, pawn_rules)
 
+def move_or_take(board, piece, target):
+    return None
+
 def check_move_legality(board, piece, target):
     legal = True
+    # check if empty square selected
+    if piece is None:
+        return False
     # check if target square exists
     if target not in board.squares:
         return False

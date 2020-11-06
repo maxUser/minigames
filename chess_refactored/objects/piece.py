@@ -7,7 +7,7 @@ class Piece:
         self.symbol = symbol
         self.threatened = False
         self.threatening = []
-        self.moved = False # for castling
+        self.moved = False # for castling and pawn double move
 
     def __str__(self):
         # return self.team.colour + ' ' + self.type + ' (' + self.pos + ')'

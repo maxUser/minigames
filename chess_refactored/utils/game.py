@@ -1,7 +1,7 @@
 from utils.setup import setup_game
 from utils.helper import (number_to_letter, piece_to_move_prompt, 
                         target_square_prompt, get_piece_to_move,
-                        check_move_legality)
+                        check_move_legality, move_or_take)
 
 def run_game():
     board, teams = setup_game()
@@ -16,7 +16,8 @@ def run_game():
         target = target_square_prompt()
         legal = check_move_legality(board, piece_to_move, target)
         
-        if legal is True and piece_to_move is not None:
+        if legal is True:
+            move_or_take = move_or_take(board, piece_to_move, target)
             board.move_piece(piece_to_move, target)
             i+=1
         else:
@@ -31,10 +32,9 @@ def run_game_test(board, team, a, b):
     """
     piece_to_move = get_piece_to_move(a, team)
     legal = check_move_legality(board, piece_to_move, b)
-    board.move_piece(piece_to_move, b)
-    # board.print_board()
+    if legal is True:
+        board.move_piece(piece_to_move, b)
     
-
     return board, team, piece_to_move, legal
 
     
